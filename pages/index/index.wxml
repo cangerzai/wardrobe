@@ -1,39 +1,68 @@
-<!--pages/index/index.wxml-->
-<view class="container">
-  <view class="header">
-    <text class="title">我的穿搭</text>
-    <text class="subtitle">左右滑动切换服装</text>
-  </view>
-
-  <!-- 卡通小人Canvas区域 -->
-  <view class="canvas-wrapper">
-    <canvas 
-      canvas-id="characterCanvas" 
-      class="character-canvas"
-      disable-scroll="true"
-      bindtouchstart="onTouchStart"
-      bindtouchmove="onTouchMove"
-      bindtouchend="onTouchEnd"
-    ></canvas>
-    
-    <!-- 加载提示 -->
-    <view class="loading-tip" wx:if="{{isLoading}}">
-      <text>加载中...</text>
+<!-- pages/index/index.wxml -->
+<view class="page">
+  <view class="hero">
+    <view class="hero-copy">
+      <text class="eyebrow">LOOKBOOK STUDIO</text>
+      <text class="hero-title">我的穿搭画册</text>
+      <text class="hero-subtitle">在画册式首页里浏览你已经卡通化的服装单品，左右滑动切换不同 Look，像翻阅每日造型手记。</text>
     </view>
   </view>
 
-  <!-- 服装信息卡片 -->
-  <view class="clothes-info">
-    <text class="clothes-name">{{currentClothes.name || '暂无服装'}}</text>
-    <text class="clothes-date">{{currentClothes.date || ''}}</text>
+  <view class="section-head">
+    <view>
+      <text class="section-title">搭配预览</text>
+      <text class="section-subtitle">左右滑动切换不同服装，查看人物穿搭预览</text>
+    </view>
   </view>
 
-  <!-- 指示器 -->
-  <view class="indicator">
-    <view 
-      class="indicator-dot {{index === currentIndex ? 'active' : ''}}"
-      wx:for="{{clothesList}}"
-      wx:key="index"
-    ></view>
+  <view class="empty-state" wx:if="{{clothesList.length === 0}}">
+    <view class="empty-orb"></view>
+    <text class="empty-kicker">NO LOOKS YET</text>
+    <text class="empty-title">你的首页还没有穿搭内容</text>
+    <text class="empty-desc">先去衣橱上传一件服装，生成卡通图后，这里就会变成你的专属 Lookbook 展台。</text>
+  </view>
+
+  <view class="stage-card" wx:else>
+    <view class="stage-topline">
+      <text class="stage-kicker">EDITORIAL PREVIEW</text>
+      <text class="stage-note">滑动切换</text>
+    </view>
+
+    <view class="canvas-shell">
+      <canvas
+        canvas-id="characterCanvas"
+        class="character-canvas"
+        disable-scroll="true"
+        bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
+        bindtouchend="onTouchEnd"
+      ></canvas>
+
+      <view class="loading-card" wx:if="{{isLoading}}">
+        <view class="loading-ring"></view>
+        <text class="loading-text">正在切换当前 Look...</text>
+      </view>
+    </view>
+
+    <view class="look-meta">
+      <view>
+        <text class="look-label">当前单品</text>
+        <text class="look-name">{{currentClothes.name || '暂无服装'}}</text>
+      </view>
+      <view class="look-date-wrap">
+        <text class="look-date">{{currentClothes.date || '等待上传'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="indicator-section" wx:if="{{clothesList.length > 0}}">
+    <text class="indicator-caption">LOOK INDEX</text>
+    <view class="indicator">
+      <view
+        class="indicator-dot {{index === currentIndex ? 'active' : ''}}"
+        wx:for="{{clothesList}}"
+        wx:key="index"
+      ></view>
+    </view>
   </view>
 </view>

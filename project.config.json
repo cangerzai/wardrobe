@@ -49,11 +49,12 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.19.4",
+  "libVersion": "3.15.1",
   "appid": "wxa8c643d35f50b1ba",
   "projectname": "电子衣橱",
   "condition": {},
   "simulatorPluginLibVersion": {},
   "editorSetting": {},
-  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
+  "cloudfunctionRoot": "cloudfunctions/"
 }

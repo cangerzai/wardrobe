@@ -1,60 +1,83 @@
-<!--pages/discover/discover.wxml-->
-<view class="container">
-  <view class="header">
-    <text class="title">发现</text>
-    <text class="subtitle">浏览其他用户的穿搭分享</text>
+<!-- pages/discover/discover.wxml -->
+<view class="page">
+  <view class="hero">
+    <view class="hero-copy">
+      <text class="eyebrow">STYLE NOTES</text>
+      <text class="hero-title">发现灵感</text>
+      <text class="hero-subtitle">浏览不同穿搭、风格笔记与氛围搭配，汲取大家的穿搭灵感。</text>
+    </view>
   </view>
 
-  <!-- 搜索栏 -->
-  <view class="search-bar">
-    <input 
-      class="search-input" 
-      placeholder="搜索穿搭..." 
-      bindinput="onSearchInput"
-      value="{{searchKeyword}}"
-    />
+  <view class="search-shell">
+    <view class="search-bar">
+      <text class="search-icon">⌕</text>
+      <input
+        class="search-input"
+        placeholder="搜索穿搭、风格、关键词..."
+        bindinput="onSearchInput"
+        value="{{searchKeyword}}"
+        placeholder-class="search-placeholder"
+      />
+    </view>
   </view>
 
-  <!-- 分类标签 -->
-  <scroll-view class="category-tabs" scroll-x="true">
-    <view 
+  <scroll-view class="category-tabs" scroll-x="true" show-scrollbar="false">
+    <view
       class="category-tab {{item.active ? 'active' : ''}}"
       wx:for="{{categories}}"
       wx:key="id"
       bindtap="switchCategory"
       data-id="{{item.id}}"
     >
-      <text>{{item.name}}</text>
+      <text class="category-text">{{item.name}}</text>
     </view>
   </scroll-view>
 
-  <!-- 穿搭列表 -->
-  <scroll-view class="outfit-list" scroll-y="true">
-    <view 
-      class="outfit-item"
+  <view class="section-head">
+    <view>
+      <text class="section-title">编辑精选</text>
+      <text class="section-subtitle">像翻阅时装志一样浏览灵感卡片</text>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{outfitList.length === 0}}">
+    <view class="empty-orb"></view>
+    <text class="empty-kicker">NO NOTES YET</text>
+    <text class="empty-title">暂时还没有新的灵感条目</text>
+    <text class="empty-desc">换一个关键词试试看，或者切换分类，寻找更适合你的风格方向。</text>
+  </view>
+
+  <view class="outfit-list" wx:else>
+    <view
+      class="outfit-card"
       wx:for="{{outfitList}}"
       wx:key="id"
       bindtap="viewOutfitDetail"
       data-id="{{item.id}}"
     >
       <image class="outfit-image" src="{{item.image}}" mode="aspectFill"></image>
-      <view class="outfit-info">
-        <view class="outfit-header">
-          <image class="avatar" src="{{item.userAvatar}}" mode="aspectFill"></image>
-          <text class="username">{{item.username}}</text>
+
+      <view class="outfit-body">
+        <view class="outfit-topline">
+          <text class="outfit-kicker">EDITORIAL LOOK</text>
+          <text class="outfit-score">❤ {{item.likes}}</text>
         </view>
+
         <text class="outfit-title">{{item.title}}</text>
-        <view class="outfit-stats">
-          <text class="stat-item">❤️ {{item.likes}}</text>
-          <text class="stat-item">💬 {{item.comments}}</text>
+
+        <view class="author-row">
+          <image class="avatar" src="{{item.userAvatar}}" mode="aspectFill"></image>
+          <view class="author-copy">
+            <text class="username">{{item.username}}</text>
+            <text class="author-note">穿搭灵感发布者</text>
+          </view>
+        </view>
+
+        <view class="outfit-footer">
+          <text class="meta-item">💬 {{item.comments}} 条评论</text>
+          <text class="meta-link">查看详情 →</text>
         </view>
       </view>
     </view>
-
-    <!-- 空状态 -->
-    <view class="empty-state" wx:if="{{outfitList.length === 0}}">
-      <text class="empty-icon">🔍</text>
-      <text class="empty-text">暂无穿搭分享</text>
-    </view>
-  </scroll-view>
+  </view>
 </view>

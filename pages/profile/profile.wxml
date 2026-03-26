@@ -1,50 +1,88 @@
-<!--pages/profile/profile.wxml-->
-<view class="container">
-  <!-- 用户信息卡片 -->
-  <view class="user-card">
-    <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
-    <text class="username">{{userInfo.nickName || '未登录'}}</text>
-    <text class="user-desc">我的个性化电子衣橱</text>
+<!-- pages/profile/profile.wxml -->
+<view class="page">
+  <view class="hero">
+    <view class="hero-copy">
+      <text class="eyebrow">PRIVATE EDIT</text>
+      <text class="hero-title">我的画册</text>
+      <text class="hero-subtitle">在这里查看你的衣橱数据、收藏灵感与个人记录，把所有搭配整理成一份专属的数字衣橱档案。</text>
+    </view>
+
+    <view class="profile-shell">
+      <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="profile-copy">
+        <text class="username">{{userInfo.nickName || '衣橱主人'}}</text>
+        <text class="user-desc">我的个性化电子衣橱</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 统计信息 -->
-  <view class="stats-section">
-    <view class="stat-item" bindtap="goToWardrobe">
-      <text class="stat-value">{{clothesCount}}</text>
+  <view class="stats-grid">
+    <view class="stat-card" bindtap="goToWardrobe">
       <text class="stat-label">我的服装</text>
+      <text class="stat-value">{{clothesCount}}</text>
     </view>
-    <view class="stat-item">
-      <text class="stat-value">{{outfitCount}}</text>
+    <view class="stat-card">
       <text class="stat-label">穿搭记录</text>
+      <text class="stat-value">{{outfitCount}}</text>
     </view>
-    <view class="stat-item">
+    <view class="stat-card accent-card">
+      <text class="stat-label">我的收藏</text>
       <text class="stat-value">{{favoriteCount}}</text>
-      <text class="stat-label">收藏</text>
     </view>
   </view>
 
-  <!-- 功能菜单 -->
-  <view class="menu-section">
+  <view class="section-head">
+    <view>
+      <text class="section-title">我的收藏</text>
+      <text class="section-subtitle">未来这里会沉淀你在发现页点过收藏的穿搭灵感</text>
+    </view>
+  </view>
+
+  <view class="favorites-empty">
+    <view class="empty-orb"></view>
+    <text class="empty-kicker">FAVORITE NOTES</text>
+    <text class="empty-title">你的收藏夹还很安静</text>
+    <text class="empty-desc">当你在发现页收藏喜欢的穿搭后，它们会出现在这里，变成你的专属灵感剪贴簿。</text>
+  </view>
+
+  <view class="section-head compact-head">
+    <view>
+      <text class="section-title">衣橱工具</text>
+      <text class="section-subtitle">管理你的数据、设置与应用信息</text>
+    </view>
+  </view>
+
+  <view class="menu-panel">
     <view class="menu-item" bindtap="manageData">
-      <text class="menu-icon">📦</text>
-      <text class="menu-text">数据管理</text>
-      <text class="menu-arrow">></text>
+      <view class="menu-icon-wrap"><text class="menu-icon">📦</text></view>
+      <view class="menu-copy">
+        <text class="menu-text">数据管理</text>
+        <text class="menu-note">查看、整理与维护本地衣橱数据</text>
+      </view>
+      <text class="menu-arrow">→</text>
     </view>
+
     <view class="menu-item" bindtap="settings">
-      <text class="menu-icon">⚙️</text>
-      <text class="menu-text">设置</text>
-      <text class="menu-arrow">></text>
+      <view class="menu-icon-wrap"><text class="menu-icon">⚙️</text></view>
+      <view class="menu-copy">
+        <text class="menu-text">设置</text>
+        <text class="menu-note">通知、主题与使用偏好</text>
+      </view>
+      <text class="menu-arrow">→</text>
     </view>
+
     <view class="menu-item" bindtap="about">
-      <text class="menu-icon">ℹ️</text>
-      <text class="menu-text">关于</text>
-      <text class="menu-arrow">></text>
+      <view class="menu-icon-wrap"><text class="menu-icon">ℹ️</text></view>
+      <view class="menu-copy">
+        <text class="menu-text">关于</text>
+        <text class="menu-note">查看应用信息与版本说明</text>
+      </view>
+      <text class="menu-arrow">→</text>
     </view>
   </view>
 
-  <!-- 操作按钮 -->
   <view class="action-section">
-    <button class="action-btn" bindtap="clearAllData">清空所有数据</button>
-    <button class="action-btn secondary" bindtap="exportData">导出数据</button>
+    <button class="action-btn danger" bindtap="clearAllData">清空所有数据</button>
+    <button class="action-btn soft" bindtap="exportData">导出数据</button>
   </view>
 </view>

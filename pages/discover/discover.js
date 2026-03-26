@@ -19,11 +19,10 @@ Page({
 
   // 加载穿搭列表
   loadOutfitList() {
-    // 模拟数据，实际项目中应从服务器获取
     const mockData = [
       {
         id: '1',
-        image: '/images/demo-outfit1.jpg',
+        image: '/images/demo-outfit1.png',
         userAvatar: '/images/default-avatar.png',
         username: '时尚达人',
         title: '春季清新穿搭',
@@ -32,7 +31,7 @@ Page({
       },
       {
         id: '2',
-        image: '/images/demo-outfit2.jpg',
+        image: '/images/demo-outfit2.png',
         userAvatar: '/images/default-avatar.png',
         username: '穿搭小能手',
         title: '简约风格搭配',
@@ -40,16 +39,6 @@ Page({
         comments: 45
       }
     ]
-
-    // 实际项目中应该调用API
-    // wx.request({
-    //   url: 'https://your-api.com/outfits',
-    //   success: res => {
-    //     this.setData({
-    //       outfitList: res.data
-    //     })
-    //   }
-    // })
 
     this.setData({
       outfitList: mockData
@@ -61,15 +50,12 @@ Page({
     this.setData({
       searchKeyword: e.detail.value
     })
-    // 实际项目中应该调用搜索API
     this.searchOutfits(e.detail.value)
   },
 
   // 搜索穿搭
   searchOutfits(keyword) {
-    // 模拟搜索，实际项目中应调用API
     console.log('搜索关键词:', keyword)
-    // 这里可以实现搜索逻辑
   },
 
   // 切换分类
@@ -85,14 +71,11 @@ Page({
       currentCategory: categoryId
     })
 
-    // 重新加载对应分类的数据
     this.loadOutfitList()
   },
 
   // 查看穿搭详情
-  viewOutfitDetail(e) {
-    const id = e.currentTarget.dataset.id
-    // 实际项目中应该跳转到详情页
+  viewOutfitDetail() {
     wx.showToast({
       title: '功能开发中',
       icon: 'none'

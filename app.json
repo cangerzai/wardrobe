@@ -3,10 +3,7 @@
     "pages/index/index",
     "pages/wardrobe/wardrobe",
     "pages/discover/discover",
-    "pages/profile/profile",
-    "cloudfunctions/styleTransfer",
-    "cloudfunctions/styleTransfer/index.js",
-    "cloudfunctions/styleTransfer/index"
+    "pages/profile/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",
