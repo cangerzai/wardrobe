@@ -23,8 +23,7 @@ Thumbs.db
 *.tmp
 *.temp
 
-# 云函数
-cloudfunctions/
+
 
 # 本地配置
 local.config.js
