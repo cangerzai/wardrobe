@@ -1,0 +1,52 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/wardrobe/wardrobe",
+    "pages/discover/discover",
+    "pages/profile/profile",
+    "cloudfunctions/styleTransfer",
+    "cloudfunctions/styleTransfer/index.js",
+    "cloudfunctions/styleTransfer/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "电子衣橱",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#3cc51f",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/wardrobe/wardrobe",
+        "iconPath": "images/wardrobe.png",
+        "selectedIconPath": "images/wardrobe-active.png",
+        "text": "衣橱"
+      },
+      {
+        "pagePath": "pages/discover/discover",
+        "iconPath": "images/discover.png",
+        "selectedIconPath": "images/discover-active.png",
+        "text": "发现"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "cloud": true
+}

@@ -1,0 +1,30 @@
+# 微信小程序
+project.private.config.json
+
+# 日志文件
+*.log
+npm-debug.log*
+
+# 依赖目录
+node_modules/
+
+# 编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+
+# 云函数
+cloudfunctions/
+
+# 本地配置
+local.config.js

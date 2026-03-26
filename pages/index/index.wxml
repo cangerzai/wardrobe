@@ -1,0 +1,39 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">我的穿搭</text>
+    <text class="subtitle">左右滑动切换服装</text>
+  </view>
+
+  <!-- 卡通小人Canvas区域 -->
+  <view class="canvas-wrapper">
+    <canvas 
+      canvas-id="characterCanvas" 
+      class="character-canvas"
+      disable-scroll="true"
+      bindtouchstart="onTouchStart"
+      bindtouchmove="onTouchMove"
+      bindtouchend="onTouchEnd"
+    ></canvas>
+    
+    <!-- 加载提示 -->
+    <view class="loading-tip" wx:if="{{isLoading}}">
+      <text>加载中...</text>
+    </view>
+  </view>
+
+  <!-- 服装信息卡片 -->
+  <view class="clothes-info">
+    <text class="clothes-name">{{currentClothes.name || '暂无服装'}}</text>
+    <text class="clothes-date">{{currentClothes.date || ''}}</text>
+  </view>
+
+  <!-- 指示器 -->
+  <view class="indicator">
+    <view 
+      class="indicator-dot {{index === currentIndex ? 'active' : ''}}"
+      wx:for="{{clothesList}}"
+      wx:key="index"
+    ></view>
+  </view>
+</view>

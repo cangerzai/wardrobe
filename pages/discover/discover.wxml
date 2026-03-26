@@ -1,0 +1,60 @@
+<!--pages/discover/discover.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">发现</text>
+    <text class="subtitle">浏览其他用户的穿搭分享</text>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input 
+      class="search-input" 
+      placeholder="搜索穿搭..." 
+      bindinput="onSearchInput"
+      value="{{searchKeyword}}"
+    />
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-tabs" scroll-x="true">
+    <view 
+      class="category-tab {{item.active ? 'active' : ''}}"
+      wx:for="{{categories}}"
+      wx:key="id"
+      bindtap="switchCategory"
+      data-id="{{item.id}}"
+    >
+      <text>{{item.name}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 穿搭列表 -->
+  <scroll-view class="outfit-list" scroll-y="true">
+    <view 
+      class="outfit-item"
+      wx:for="{{outfitList}}"
+      wx:key="id"
+      bindtap="viewOutfitDetail"
+      data-id="{{item.id}}"
+    >
+      <image class="outfit-image" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="outfit-info">
+        <view class="outfit-header">
+          <image class="avatar" src="{{item.userAvatar}}" mode="aspectFill"></image>
+          <text class="username">{{item.username}}</text>
+        </view>
+        <text class="outfit-title">{{item.title}}</text>
+        <view class="outfit-stats">
+          <text class="stat-item">❤️ {{item.likes}}</text>
+          <text class="stat-item">💬 {{item.comments}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{outfitList.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">暂无穿搭分享</text>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,50 @@
+<!--pages/wardrobe/wardrobe.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">我的衣橱</text>
+    <text class="subtitle">上传服装图片，自动卡通化</text>
+  </view>
+
+  <!-- 上传按钮 -->
+  <view class="upload-section">
+    <button class="upload-btn" bindtap="chooseImage">
+      <text class="upload-icon">+</text>
+      <text class="upload-text">上传新服装</text>
+    </button>
+  </view>
+
+  <!-- 服装列表 -->
+  <scroll-view class="clothes-list" scroll-y="true">
+    <view 
+      class="clothes-item" 
+      wx:for="{{clothesList}}" 
+      wx:key="id"
+      bindtap="previewClothes"
+      data-index="{{index}}"
+    >
+      <image class="clothes-image" src="{{item.cartoonUrl || item.originalUrl}}" mode="aspectFill"></image>
+      <view class="clothes-meta">
+        <text class="clothes-name">{{item.name || '未命名'}}</text>
+        <text class="clothes-date">{{item.date}}</text>
+      </view>
+      <view class="clothes-actions">
+        <text class="action-btn" catchtap="deleteClothes" data-id="{{item.id}}">删除</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{clothesList.length === 0}}">
+      <text class="empty-icon">👔</text>
+      <text class="empty-text">衣橱空空如也</text>
+      <text class="empty-hint">点击上方按钮上传第一件服装吧</text>
+    </view>
+  </scroll-view>
+
+  <!-- 处理中提示 -->
+  <view class="processing-modal" wx:if="{{isProcessing}}">
+    <view class="modal-content">
+      <text class="modal-text">正在处理图片...</text>
+      <text class="modal-hint">请稍候，正在将您的服装卡通化</text>
+    </view>
+  </view>
+</view>
