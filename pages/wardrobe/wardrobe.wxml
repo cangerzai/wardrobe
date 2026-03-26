@@ -1,50 +1,89 @@
-<!--pages/wardrobe/wardrobe.wxml-->
-<view class="container">
-  <view class="header">
-    <text class="title">我的衣橱</text>
-    <text class="subtitle">上传服装图片，自动卡通化</text>
+<!-- pages/wardrobe/wardrobe.wxml -->
+<view class="page">
+  <view class="hero">
+    <view class="hero-copy">
+      <text class="eyebrow">LOOKBOOK WARDROBE</text>
+      <text class="hero-title">我的衣橱</text>
+      <text class="hero-subtitle">把日常服装整理成一册轻盈的数字时装簿，上传后自动生成卡通风格作品。</text>
+    </view>
+
+    <view class="hero-panel">
+      <view class="stat-card stat-dark">
+        <text class="stat-label">单品数量</text>
+        <text class="stat-value">{{clothesList.length}}</text>
+      </view>
+      <view class="stat-card stat-light">
+        <text class="stat-label">风格状态</text>
+        <text class="stat-value stat-mini">AnimeGANv3</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 上传按钮 -->
-  <view class="upload-section">
-    <button class="upload-btn" bindtap="chooseImage">
-      <text class="upload-icon">+</text>
-      <text class="upload-text">上传新服装</text>
+  <view class="upload-wrap">
+    <button class="upload-card" bindtap="chooseImage" loading="{{isProcessing}}">
+      <view class="upload-badge">NEW PROFIT</view>
+      <text class="upload-title">上传新服装</text>
+      <text class="upload-desc">支持拍照或从相册选择，上传后会自动生成卡通化服装图。</text>
+      <view class="upload-action">
+        <text class="upload-action-text">开始创建</text>
+        <text class="upload-action-arrow">→</text>
+      </view>
     </button>
   </view>
 
-  <!-- 服装列表 -->
-  <scroll-view class="clothes-list" scroll-y="true">
-    <view 
-      class="clothes-item" 
-      wx:for="{{clothesList}}" 
+  <view class="section-head">
+    <view>
+      <text class="section-title">本季藏品</text>
+      <text class="section-subtitle">保留原图与卡通图双视图，像翻阅一本属于你的数字 Lookbook</text>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{clothesList.length === 0}}">
+    <view class="empty-orb"></view>
+    <text class="empty-kicker">FIRST PIECE</text>
+    <text class="empty-title">你的 Lookbook 还没有开始</text>
+    <text class="empty-desc">先上传一件服装，让它变成属于你的第一张时尚插画。</text>
+    <button class="empty-btn" bindtap="chooseImage">上传第一件服装</button>
+  </view>
+
+  <view class="gallery" wx:else>
+    <view
+      class="look-card"
+      wx:for="{{clothesList}}"
       wx:key="id"
-      bindtap="previewClothes"
-      data-index="{{index}}"
     >
-      <image class="clothes-image" src="{{item.cartoonUrl || item.originalUrl}}" mode="aspectFill"></image>
-      <view class="clothes-meta">
-        <text class="clothes-name">{{item.name || '未命名'}}</text>
-        <text class="clothes-date">{{item.date}}</text>
+      <view class="look-card-head">
+        <view class="look-title-group">
+          <text class="look-index">LOOK {{index + 1}}</text>
+          <text class="look-name">{{item.name || '未命名单品'}}</text>
+          <text class="category-tag {{item.category === 'pants' ? 'tag-pants' : (item.category === 'top' ? 'tag-top' : 'tag-unknown')}}">{{item.categoryLabel || '未分类'}}</text>
+        </view>
+        <text class="look-date">{{item.date}}</text>
       </view>
-      <view class="clothes-actions">
-        <text class="action-btn" catchtap="deleteClothes" data-id="{{item.id}}">删除</text>
+
+      <view class="look-images">
+        <view class="image-pane soft-pane" wx:if="{{item.originalUrl}}" bindtap="previewClothes" data-index="{{index}}" data-type="original">
+          <text class="pane-label">原图</text>
+          <image class="look-image" src="{{item.originalUrl}}" mode="aspectFill"></image>
+        </view>
+        <view class="image-pane accent-pane" bindtap="previewClothes" data-index="{{index}}" data-type="cartoon">
+          <text class="pane-label">卡通图</text>
+          <image class="look-image" src="{{item.cartoonUrl || item.originalUrl}}" mode="aspectFill"></image>
+        </view>
+      </view>
+
+      <view class="look-footer">
+        <text class="look-hint">点击左侧查看原图，点击右侧查看卡通图</text>
+        <text class="delete-btn" catchtap="deleteClothes" data-id="{{item.id}}">移出衣橱</text>
       </view>
     </view>
+  </view>
 
-    <!-- 空状态 -->
-    <view class="empty-state" wx:if="{{clothesList.length === 0}}">
-      <text class="empty-icon">👔</text>
-      <text class="empty-text">衣橱空空如也</text>
-      <text class="empty-hint">点击上方按钮上传第一件服装吧</text>
-    </view>
-  </scroll-view>
-
-  <!-- 处理中提示 -->
-  <view class="processing-modal" wx:if="{{isProcessing}}">
-    <view class="modal-content">
-      <text class="modal-text">正在处理图片...</text>
-      <text class="modal-hint">请稍候，正在将您的服装卡通化</text>
+  <view class="processing-overlay" wx:if="{{isProcessing}}">
+    <view class="processing-card">
+      <view class="processing-ring"></view>
+      <text class="processing-title">正在生成 Lookbook 单品</text>
+      <text class="processing-desc">正在把你的服装转成卡通服装，请稍候片刻。</text>
     </view>
   </view>
 </view>

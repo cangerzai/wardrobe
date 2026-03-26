@@ -12,13 +12,31 @@ Page({
   },
 
   onShow() {
-    // 每次显示页面时刷新数据
     this.loadWardrobeData()
   },
 
   // 加载衣橱数据
-  loadWardrobeData() {
+  async loadWardrobeData() {
     const wardrobeData = wx.getStorageSync('wardrobeData') || []
+
+    for (let i = 0; i < wardrobeData.length; i++) {
+      const item = wardrobeData[i]
+
+      try {
+        if (item.cartoonFileID) {
+          item.cartoonUrl = await this.getTempFileURL(item.cartoonFileID)
+        }
+
+        if (item.originalFileID) {
+          item.originalUrl = await this.getTempFileURL(item.originalFileID)
+        }
+      } catch (e) {
+        console.warn('衣橱页刷新临时链接失败', e)
+      }
+    }
+
+    wx.setStorageSync('wardrobeData', wardrobeData)
+
     this.setData({
       clothesList: wardrobeData
     })
@@ -51,34 +69,36 @@ Page({
     })
 
     try {
-      // 1. 上传原图到云存储（如果使用云开发）
       const originalFileID = await this.uploadToCloud(filePath)
-      
-      // 2. 调用风格迁移服务
+
       wx.showLoading({
         title: '正在处理...',
         mask: true
       })
 
-      // 原图也转成临时 URL，保证之后预览/绘制可用
       const originalUrl = await this.getTempFileURL(originalFileID)
-      const cartoonUrl = await styleTransferService.transferToCartoon(originalFileID)
-      
-      // 3. 保存到本地存储
+      const transferResult = await styleTransferService.transferToCartoon(originalFileID)
+      const cartoonFileID = transferResult.cartoonFileID
+      const cartoonUrl = await this.getTempFileURL(cartoonFileID)
+
       const newClothes = {
         id: Date.now().toString(),
         name: `服装_${new Date().toLocaleDateString()}`,
-        originalUrl: originalUrl,
-        cartoonUrl: cartoonUrl,
+        originalFileID,
+        cartoonFileID,
+        originalUrl,
+        cartoonUrl,
+        category: transferResult.category || 'unknown',
+        categoryLabel: transferResult.categoryLabel || '未分类',
+        categoryScore: Number(transferResult.categoryScore || 0),
         date: new Date().toLocaleDateString('zh-CN'),
         uploadTime: Date.now()
       }
 
       const wardrobeData = wx.getStorageSync('wardrobeData') || []
-      wardrobeData.unshift(newClothes) // 新上传的放在最前面
+      wardrobeData.unshift(newClothes)
       wx.setStorageSync('wardrobeData', wardrobeData)
 
-      // 4. 更新页面数据
       this.setData({
         clothesList: wardrobeData,
         isProcessing: false
@@ -89,7 +109,6 @@ Page({
         title: '上传成功',
         icon: 'success'
       })
-
     } catch (error) {
       console.error('处理图片失败', error)
       this.setData({
@@ -104,14 +123,14 @@ Page({
     }
   },
 
-  // 上传到云存储（示例）
+  // 上传到云存储
   async uploadToCloud(filePath) {
     return new Promise((resolve, reject) => {
       const cloudPath = `clothes/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`
-      
+
       wx.cloud.uploadFile({
-        cloudPath: cloudPath,
-        filePath: filePath,
+        cloudPath,
+        filePath,
         success: res => {
           resolve(res.fileID)
         },
@@ -122,7 +141,7 @@ Page({
     })
   },
 
-  // 把云存储 fileID 转成临时可访问 URL（用于 <image src="">）
+  // 获取临时文件 URL
   getTempFileURL(fileID) {
     return new Promise((resolve, reject) => {
       wx.cloud.getTempFileURL({
@@ -143,18 +162,31 @@ Page({
   // 预览服装
   previewClothes(e) {
     const index = e.currentTarget.dataset.index
+    const type = e.currentTarget.dataset.type || 'cartoon'
     const item = this.data.clothesList[index]
-    
+
+    const targetUrl = type === 'original'
+      ? (item.originalUrl || item.cartoonUrl)
+      : (item.cartoonUrl || item.originalUrl)
+
+    if (!targetUrl) {
+      wx.showToast({
+        title: '图片暂不可预览',
+        icon: 'none'
+      })
+      return
+    }
+
     wx.previewImage({
-      urls: [item.cartoonUrl || item.originalUrl],
-      current: item.cartoonUrl || item.originalUrl
+      urls: [targetUrl],
+      current: targetUrl
     })
   },
 
   // 删除服装
   deleteClothes(e) {
     const id = e.currentTarget.dataset.id
-    
+
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这件服装吗？',
@@ -165,7 +197,7 @@ Page({
           this.setData({
             clothesList: wardrobeData
           })
-          
+
           wx.showToast({
             title: '删除成功',
             icon: 'success'

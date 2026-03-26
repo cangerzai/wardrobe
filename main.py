@@ -21,6 +21,9 @@ class CartoonizeReq(BaseModel):
 
 class CartoonizeResp(BaseModel):
     imageBase64: str
+    category: str
+    categoryLabel: str
+    categoryScore: float
 
 
 def get_session():
@@ -31,6 +34,13 @@ def get_session():
 
 session = get_session()
 input_name = session.get_inputs()[0].name
+
+
+CATEGORY_LABELS = {
+    "top": "上衣",
+    "pants": "裤子",
+    "unknown": "未分类"
+}
 
 
 def to_multiple(x: int, is_tiny: bool = False) -> int:
@@ -61,6 +71,51 @@ def postprocess_image(output_tensor, original_size):
     return Image.fromarray(out)
 
 
+def classify_garment(pil_img: Image.Image):
+    """
+    简单启发式分类：在白底商品图场景下区分上衣/裤子。
+    返回 (category, score)
+    """
+    img = np.array(pil_img.convert("RGB"))
+
+    # 白底抠前景：非接近白色区域视为衣物
+    fg_mask = np.any(img < 240, axis=2)
+    if not np.any(fg_mask):
+        return "unknown", 0.0
+
+    ys, xs = np.where(fg_mask)
+    y_min, y_max = int(np.min(ys)), int(np.max(ys))
+    x_min, x_max = int(np.min(xs)), int(np.max(xs))
+
+    box_h = max(1, y_max - y_min + 1)
+    box_w = max(1, x_max - x_min + 1)
+    aspect_ratio = box_h / box_w
+
+    # 前景中心在图中的垂直位置（0 顶部，1 底部）
+    center_y = float(np.mean(ys)) / img.shape[0]
+
+    # 裤子通常更细长（h/w大）且重心更靠下；上衣更靠上更宽
+    pants_score = 0.0
+    if aspect_ratio >= 1.35:
+        pants_score += 0.45
+    elif aspect_ratio >= 1.15:
+        pants_score += 0.25
+
+    if center_y >= 0.56:
+        pants_score += 0.45
+    elif center_y >= 0.50:
+        pants_score += 0.25
+
+    pants_score = min(0.95, pants_score)
+
+    if pants_score >= 0.55:
+        return "pants", float(round(pants_score, 2))
+
+    top_score = 1.0 - pants_score
+    top_score = max(0.55, min(0.95, top_score))
+    return "top", float(round(top_score, 2))
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "model": MODEL_PATH}
@@ -72,6 +127,9 @@ def cartoonize(req: CartoonizeReq):
         img_bytes = base64.b64decode(req.imageBase64)
         pil_img = Image.open(BytesIO(img_bytes)).convert("RGB")
 
+        category, score = classify_garment(pil_img)
+        category_label = CATEGORY_LABELS.get(category, CATEGORY_LABELS["unknown"])
+
         input_tensor, original_size = preprocess_image(pil_img, MODEL_PATH)
         outputs = session.run(None, {input_name: input_tensor})
         result_img = postprocess_image(outputs[0], original_size)
@@ -80,6 +138,11 @@ def cartoonize(req: CartoonizeReq):
         result_img.save(out_buf, format="JPEG", quality=95)
         out_b64 = base64.b64encode(out_buf.getvalue()).decode("utf-8")
 
-        return CartoonizeResp(imageBase64=out_b64)
+        return CartoonizeResp(
+            imageBase64=out_b64,
+            category=category,
+            categoryLabel=category_label,
+            categoryScore=score
+        )
     except Exception as e:
         raise RuntimeError(f"cartoonize failed: {str(e)}")
