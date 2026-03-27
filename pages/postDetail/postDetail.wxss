@@ -1,0 +1,252 @@
+/* pages/postDetail/postDetail.wxss */
+.page {
+  min-height: 100vh;
+  padding: 0 0 140rpx;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top right, rgba(212, 167, 98, 0.22), transparent 28%),
+    linear-gradient(180deg, #f8f2e9 0%, #efe4d2 42%, #eadcc9 100%);
+}
+
+.post-card {
+  background: rgba(255, 251, 247, 0.95);
+  margin: 24rpx;
+  border-radius: 32rpx;
+  overflow: hidden;
+  box-shadow: 0 16rpx 36rpx rgba(95, 67, 37, 0.1);
+}
+
+.post-image {
+  width: 100%;
+  height: 480rpx;
+  display: block;
+}
+
+.post-body {
+  padding: 28rpx;
+}
+
+.author-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: rgba(143, 101, 72, 0.12);
+}
+
+.author-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.username {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #3c2a1f;
+}
+
+.post-time {
+  font-size: 22rpx;
+  color: #9a7d63;
+}
+
+.post-desc {
+  display: block;
+  font-size: 30rpx;
+  line-height: 1.8;
+  color: #3c2a1f;
+  margin-bottom: 18rpx;
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.tag-item {
+  font-size: 22rpx;
+  color: #8b6344;
+  background: rgba(143, 101, 72, 0.1);
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+.action-bar {
+  display: flex;
+  gap: 36rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid rgba(143, 101, 72, 0.1);
+}
+
+.action-btn-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.action-icon {
+  font-size: 36rpx;
+  color: #b5967a;
+}
+
+.icon-liked {
+  color: #e05a5a;
+}
+
+.icon-faved {
+  color: #d4a338;
+}
+
+.action-count {
+  font-size: 24rpx;
+  color: #9a7d63;
+}
+
+/* 评论区 */
+.comment-section {
+  margin: 0 24rpx 24rpx;
+  background: rgba(255, 251, 247, 0.95);
+  border-radius: 32rpx;
+  padding: 28rpx;
+  box-shadow: 0 8rpx 24rpx rgba(95, 67, 37, 0.07);
+}
+
+.comment-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #3c2a1f;
+  margin-bottom: 24rpx;
+}
+
+.comment-empty {
+  padding: 32rpx 0;
+  text-align: center;
+}
+
+.comment-empty-text {
+  font-size: 26rpx;
+  color: #9a7d63;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.comment-item {
+  display: flex;
+  gap: 16rpx;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(143, 101, 72, 0.12);
+}
+
+.comment-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.comment-user {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #3c2a1f;
+}
+
+.comment-text {
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #5a3e2c;
+}
+
+.comment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4rpx;
+}
+
+.comment-time {
+  font-size: 22rpx;
+  color: #a88060;
+}
+
+.comment-del-btn {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1rpx solid rgba(192, 57, 43, 0.2);
+}
+
+.comment-del-icon {
+  font-size: 18rpx;
+  color: #c0392b;
+}
+
+.comment-del-text {
+  font-size: 20rpx;
+  color: #c0392b;
+  font-weight: 500;
+}
+
+/* 底部输入栏 */
+.comment-input-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  background: rgba(255, 251, 247, 0.97);
+  border-top: 1rpx solid rgba(143, 101, 72, 0.12);
+  box-sizing: border-box;
+}
+
+.comment-input {
+  flex: 1;
+  padding: 16rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(143, 101, 72, 0.08);
+  font-size: 26rpx;
+  color: #3c2a1f;
+  height: 72rpx;
+}
+
+.comment-placeholder {
+  color: #b5967a;
+}
+
+.comment-send-btn {
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #4f392a 0%, #8f6548 100%);
+}
+
+.comment-send-text {
+  font-size: 26rpx;
+  color: #fff9f1;
+  font-weight: 600;
+}

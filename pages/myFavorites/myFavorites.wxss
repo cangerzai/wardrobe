@@ -1,0 +1,143 @@
+/* pages/myFavorites/myFavorites.wxss */
+.page {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 60rpx;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top right, rgba(212, 167, 98, 0.22), transparent 28%),
+    linear-gradient(180deg, #f8f2e9 0%, #efe4d2 42%, #eadcc9 100%);
+}
+
+.header {
+  margin-bottom: 32rpx;
+}
+
+.header-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #3c2a1f;
+  margin-bottom: 8rpx;
+}
+
+.header-sub {
+  display: block;
+  font-size: 24rpx;
+  color: #8f7257;
+}
+
+.loading-tip {
+  text-align: center;
+  padding: 60rpx;
+  font-size: 26rpx;
+  color: #9a7d63;
+}
+
+.empty-state {
+  margin-top: 60rpx;
+  background: rgba(255, 250, 244, 0.88);
+  border-radius: 32rpx;
+  padding: 80rpx 42rpx;
+  text-align: center;
+}
+
+.empty-orb {
+  width: 160rpx;
+  height: 160rpx;
+  margin: 0 auto 26rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f8e8d1 0%, #d1ab7d 42%, #7e5c42 100%);
+  opacity: 0.8;
+}
+
+.empty-kicker {
+  display: block;
+  font-size: 20rpx;
+  letter-spacing: 5rpx;
+  color: #a17f5d;
+  margin-bottom: 14rpx;
+}
+
+.empty-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #3b2b21;
+  margin-bottom: 14rpx;
+}
+
+.empty-desc {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.9;
+  color: #8c6f56;
+}
+
+.fav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.fav-card {
+  display: flex;
+  gap: 20rpx;
+  background: rgba(255, 251, 247, 0.92);
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(95, 67, 37, 0.08);
+}
+
+.fav-image {
+  width: 180rpx;
+  height: 180rpx;
+  flex-shrink: 0;
+}
+
+.fav-body {
+  flex: 1;
+  padding: 20rpx 20rpx 20rpx 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  justify-content: center;
+}
+
+.fav-desc {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #3c2a1f;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.fav-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.fav-tag {
+  font-size: 20rpx;
+  color: #8b6344;
+  background: rgba(143, 101, 72, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+}
+
+.fav-user {
+  font-size: 22rpx;
+  color: #9a7d63;
+}
+
+.fav-meta {
+  display: flex;
+  gap: 16rpx;
+}
+
+.fav-stat {
+  font-size: 22rpx;
+  color: #9a7d63;
+}

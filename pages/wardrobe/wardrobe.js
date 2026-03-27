@@ -83,7 +83,7 @@ Page({
 
       const newClothes = {
         id: Date.now().toString(),
-        name: `服装_${new Date().toLocaleDateString()}`,
+        name: '新服装',
         originalFileID,
         cartoonFileID,
         originalUrl,
@@ -91,7 +91,7 @@ Page({
         category: transferResult.category || 'unknown',
         categoryLabel: transferResult.categoryLabel || '未分类',
         categoryScore: Number(transferResult.categoryScore || 0),
-        date: new Date().toLocaleDateString('zh-CN'),
+        remark: '',
         uploadTime: Date.now()
       }
 
@@ -180,6 +180,24 @@ Page({
     wx.previewImage({
       urls: [targetUrl],
       current: targetUrl
+    })
+  },
+
+  // 备注输入
+  onRemarkInput(e) {
+    const id = e.currentTarget.dataset.id
+    const remark = e.detail.value
+
+    const wardrobeData = this.data.clothesList.map(item => {
+      if (item.id === id) {
+        return { ...item, remark }
+      }
+      return item
+    })
+
+    wx.setStorageSync('wardrobeData', wardrobeData)
+    this.setData({
+      clothesList: wardrobeData
     })
   },
 

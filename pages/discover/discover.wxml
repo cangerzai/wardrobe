@@ -1,19 +1,33 @@
 <!-- pages/discover/discover.wxml -->
 <view class="page">
-  <view class="hero">
-    <view class="hero-copy">
-      <text class="eyebrow">STYLE NOTES</text>
-      <text class="hero-title">发现灵感</text>
-      <text class="hero-subtitle">浏览不同穿搭、风格笔记与氛围搭配，汲取大家的穿搭灵感。</text>
+
+  <!-- 顶部入口区 -->
+  <view class="entry-group">
+    <view class="entry-card entry-publish" bindtap="goPublish">
+      <view class="entry-icon-wrap"><text class="entry-icon">✦</text></view>
+      <view class="entry-copy">
+        <text class="entry-title">发布穿搭</text>
+        <text class="entry-desc">上传图片，写下你的搭配灵感</text>
+      </view>
+      <text class="entry-arrow">→</text>
+    </view>
+    <view class="entry-card entry-myposts" bindtap="goMyPosts">
+      <view class="entry-icon-wrap"><text class="entry-icon">≡</text></view>
+      <view class="entry-copy">
+        <text class="entry-title">我发布的帖子</text>
+        <text class="entry-desc">查看和管理你发布过的内容</text>
+      </view>
+      <text class="entry-arrow">→</text>
     </view>
   </view>
 
+  <!-- 搜索栏 -->
   <view class="search-shell">
     <view class="search-bar">
       <text class="search-icon">⌕</text>
       <input
         class="search-input"
-        placeholder="搜索穿搭、风格、关键词..."
+        placeholder="搜索穿搭灵感说明..."
         bindinput="onSearchInput"
         value="{{searchKeyword}}"
         placeholder-class="search-placeholder"
@@ -21,63 +35,71 @@
     </view>
   </view>
 
+  <!-- 风格分类标签筛选 -->
   <scroll-view class="category-tabs" scroll-x="true" show-scrollbar="false">
+    <view class="category-tab {{activeFilter === '' ? 'active' : ''}}" bindtap="setFilter" data-tag="">
+      <text class="category-text">全部</text>
+    </view>
     <view
-      class="category-tab {{item.active ? 'active' : ''}}"
-      wx:for="{{categories}}"
-      wx:key="id"
-      bindtap="switchCategory"
-      data-id="{{item.id}}"
+      class="category-tab {{activeFilter === item ? 'active' : ''}}"
+      wx:for="{{styleOptions}}"
+      wx:key="*this"
+      bindtap="setFilter"
+      data-tag="{{item}}"
     >
-      <text class="category-text">{{item.name}}</text>
+      <text class="category-text">{{item}}</text>
     </view>
   </scroll-view>
 
   <view class="section-head">
     <view>
-      <text class="section-title">编辑精选</text>
-      <text class="section-subtitle">像翻阅时装志一样浏览灵感卡片</text>
+      <text class="section-title">发现圈</text>
+      <text class="section-subtitle">浏览大家分享的穿搭灵感</text>
     </view>
   </view>
 
-  <view class="empty-state" wx:if="{{outfitList.length === 0}}">
+  <view class="empty-state" wx:if="{{filteredList.length === 0}}">
     <view class="empty-orb"></view>
-    <text class="empty-kicker">NO NOTES YET</text>
-    <text class="empty-title">暂时还没有新的灵感条目</text>
-    <text class="empty-desc">换一个关键词试试看，或者切换分类，寻找更适合你的风格方向。</text>
+    <text class="empty-kicker">NO POSTS YET</text>
+    <text class="empty-title">还没有穿搭分享</text>
+    <text class="empty-desc">成为第一个在这里分享穿搭灵感的人吧。</text>
   </view>
 
   <view class="outfit-list" wx:else>
-    <view
-      class="outfit-card"
-      wx:for="{{outfitList}}"
-      wx:key="id"
-      bindtap="viewOutfitDetail"
-      data-id="{{item.id}}"
-    >
-      <image class="outfit-image" src="{{item.image}}" mode="aspectFill"></image>
-
+    <view class="outfit-card" wx:for="{{filteredList}}" wx:key="id">
+      <image class="outfit-image" src="{{item.image}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.id}}"></image>
       <view class="outfit-body">
         <view class="outfit-topline">
-          <text class="outfit-kicker">EDITORIAL LOOK</text>
-          <text class="outfit-score">❤ {{item.likes}}</text>
+          <text class="outfit-kicker">STYLE POST</text>
+          <text class="outfit-time">{{item.timeLabel}}</text>
         </view>
-
-        <text class="outfit-title">{{item.title}}</text>
-
+        <text class="outfit-title" bindtap="goDetail" data-id="{{item.id}}">{{item.desc || '无说明'}}</text>
+        <view class="tags-display" wx:if="{{item.tags.length > 0}}">
+          <text class="tag-item" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag"># {{tag}}</text>
+        </view>
         <view class="author-row">
-          <image class="avatar" src="{{item.userAvatar}}" mode="aspectFill"></image>
+          <image class="avatar" src="/images/default-avatar.png" mode="aspectFill"></image>
           <view class="author-copy">
-            <text class="username">{{item.username}}</text>
+            <text class="username">{{item.username || '衣橱用户'}}</text>
             <text class="author-note">穿搭灵感发布者</text>
           </view>
         </view>
-
-        <view class="outfit-footer">
-          <text class="meta-item">💬 {{item.comments}} 条评论</text>
-          <text class="meta-link">查看详情 →</text>
+        <view class="action-bar">
+          <view class="action-btn-wrap" catchtap="toggleLike" data-id="{{item.id}}">
+            <text class="action-icon {{item.liked ? 'icon-liked' : ''}}">♥</text>
+            <text class="action-count">{{item.likes}}</text>
+          </view>
+          <view class="action-btn-wrap" catchtap="toggleFav" data-id="{{item.id}}">
+            <text class="action-icon {{item.faved ? 'icon-faved' : ''}}">★</text>
+            <text class="action-count">{{item.faved ? '已收藏' : '收藏'}}</text>
+          </view>
+          <view class="action-btn-wrap" bindtap="goDetail" data-id="{{item.id}}">
+            <text class="action-icon">💬</text>
+            <text class="action-count">{{item.comments}} 评论</text>
+          </view>
         </view>
       </view>
     </view>
   </view>
+
 </view>

@@ -1,68 +1,78 @@
 <!-- pages/index/index.wxml -->
 <view class="page">
+
+  <!-- 顶部标题 -->
   <view class="hero">
     <view class="hero-copy">
-      <text class="eyebrow">LOOKBOOK STUDIO</text>
-      <text class="hero-title">我的穿搭画册</text>
-      <text class="hero-subtitle">在画册式首页里浏览你已经卡通化的服装单品，左右滑动切换不同 Look，像翻阅每日造型手记。</text>
+      <text class="eyebrow">LOOKBOOK</text>
+      <text class="hero-title">虚拟试衣间</text>
+      <text class="hero-subtitle">选择分类，左右滑动切换服装，查看穿搭效果。</text>
     </view>
   </view>
 
-  <view class="section-head">
-    <view>
-      <text class="section-title">搭配预览</text>
-      <text class="section-subtitle">左右滑动切换不同服装，查看人物穿搭预览</text>
-    </view>
-  </view>
+  <!-- 换装舞台 -->
+  <view class="stage-wrap">
 
-  <view class="empty-state" wx:if="{{clothesList.length === 0}}">
-    <view class="empty-orb"></view>
-    <text class="empty-kicker">NO LOOKS YET</text>
-    <text class="empty-title">你的首页还没有穿搭内容</text>
-    <text class="empty-desc">先去衣橱上传一件服装，生成卡通图后，这里就会变成你的专属 Lookbook 展台。</text>
-  </view>
-
-  <view class="stage-card" wx:else>
-    <view class="stage-topline">
-      <text class="stage-kicker">EDITORIAL PREVIEW</text>
-      <text class="stage-note">滑动切换</text>
-    </view>
-
-    <view class="canvas-shell">
-      <canvas
-        canvas-id="characterCanvas"
-        class="character-canvas"
-        disable-scroll="true"
-        bindtouchstart="onTouchStart"
-        bindtouchmove="onTouchMove"
-        bindtouchend="onTouchEnd"
-      ></canvas>
-
-      <view class="loading-card" wx:if="{{isLoading}}">
-        <view class="loading-ring"></view>
-        <text class="loading-text">正在切换当前 Look...</text>
+    <!-- 左上角分类下拉 -->
+    <view class="category-selector">
+      <view class="selector-btn" bindtap="toggleDropdown">
+        <text class="selector-label">{{categoryLabel}}</text>
+        <text class="selector-arrow">{{showDropdown ? '▲' : '▼'}}</text>
+      </view>
+      <view class="dropdown-menu" wx:if="{{showDropdown}}">
+        <view class="dropdown-item {{activeCategory === 'top' ? 'active' : ''}}" bindtap="selectCategory" data-cat="top" data-label="上衣">上衣</view>
+        <view class="dropdown-item {{activeCategory === 'pants' ? 'active' : ''}}" bindtap="selectCategory" data-cat="pants" data-label="裤子">裤子</view>
       </view>
     </view>
 
-    <view class="look-meta">
-      <view>
-        <text class="look-label">当前单品</text>
-        <text class="look-name">{{currentClothes.name || '暂无服装'}}</text>
+    <!-- 模特展示区 -->
+    <view
+      class="model-stage"
+      bindtouchstart="onTouchStart"
+      bindtouchend="onTouchEnd"
+    >
+      <!-- 模特底图 -->
+      <image class="model-img" src="/images/model.png" mode="aspectFit"></image>
+
+      <!-- 服装叠加层（上衣）-->
+      <view class="clothes-overlay top-overlay" wx:if="{{activeCategory === 'top' && currentClothes.cartoonUrl}}">
+        <image class="clothes-img" src="{{currentClothes.cartoonUrl}}" mode="aspectFit"></image>
       </view>
-      <view class="look-date-wrap">
-        <text class="look-date">{{currentClothes.date || '等待上传'}}</text>
+
+      <!-- 服装叠加层（裤子）-->
+      <view class="clothes-overlay pants-overlay" wx:if="{{activeCategory === 'pants' && currentClothes.cartoonUrl}}">
+        <image class="clothes-img" src="{{currentClothes.cartoonUrl}}" mode="aspectFit"></image>
+      </view>
+
+      <!-- 空状态提示 -->
+      <view class="stage-empty" wx:if="{{filteredList.length === 0}}">
+        <text class="stage-empty-text">暂无{{categoryLabel}}，去衣橱上传吧</text>
+      </view>
+
+      <!-- 左右切换提示箭头 -->
+      <view class="swipe-hint" wx:if="{{filteredList.length > 1}}">
+        <text class="swipe-arrow left-arrow">‹</text>
+        <text class="swipe-arrow right-arrow">›</text>
       </view>
     </view>
-  </view>
 
-  <view class="indicator-section" wx:if="{{clothesList.length > 0}}">
-    <text class="indicator-caption">LOOK INDEX</text>
-    <view class="indicator">
+    <!-- 当前服装信息 -->
+    <view class="clothes-info" wx:if="{{filteredList.length > 0}}">
+      <text class="clothes-name">{{currentClothes.name || '服装单品'}}</text>
+      <view class="clothes-index">
+        <text class="clothes-index-text">{{currentFilterIndex + 1}} / {{filteredList.length}}</text>
+      </view>
+    </view>
+
+    <!-- 指示点 -->
+    <view class="indicator" wx:if="{{filteredList.length > 1}}">
       <view
-        class="indicator-dot {{index === currentIndex ? 'active' : ''}}"
-        wx:for="{{clothesList}}"
-        wx:key="index"
+        class="indicator-dot {{index === currentFilterIndex ? 'active' : ''}}"
+        wx:for="{{filteredList}}"
+        wx:key="id"
       ></view>
     </view>
+
   </view>
+
 </view>

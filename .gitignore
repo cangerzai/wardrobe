@@ -23,7 +23,9 @@ Thumbs.db
 *.tmp
 *.temp
 
-
-
 # 本地配置
 local.config.js
+
+# 模型文件（体积过大，不纳入 Git）
+models/
+*.onnx

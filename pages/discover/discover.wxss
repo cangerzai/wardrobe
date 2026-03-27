@@ -9,6 +9,95 @@
     linear-gradient(180deg, #f8f2e9 0%, #efe4d2 42%, #eadcc9 100%);
 }
 
+/* 顶部入口区 */
+.entry-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 4rpx;
+}
+
+.entry-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  border-radius: 28rpx;
+  padding: 28rpx 28rpx;
+  box-shadow: 0 10rpx 28rpx rgba(69, 43, 20, 0.13);
+}
+
+.entry-publish {
+  background: linear-gradient(135deg, rgba(59, 43, 33, 0.96) 0%, rgba(90, 66, 50, 0.92) 58%, rgba(163, 118, 74, 0.88) 100%);
+}
+
+.entry-myposts {
+  background: rgba(255, 251, 247, 0.92);
+  border: 1rpx solid rgba(143, 101, 72, 0.15);
+}
+
+.entry-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: rgba(255, 247, 236, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.entry-publish .entry-icon-wrap {
+  background: rgba(255, 247, 236, 0.18);
+}
+
+.entry-myposts .entry-icon-wrap {
+  background: rgba(143, 101, 72, 0.1);
+}
+
+.entry-icon {
+  font-size: 32rpx;
+  color: #fff9f1;
+}
+
+.entry-myposts .entry-icon {
+  color: #7a5c40;
+}
+
+.entry-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.entry-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff9f1;
+}
+
+.entry-myposts .entry-title {
+  color: #3c2a1f;
+}
+
+.entry-desc {
+  font-size: 22rpx;
+  color: rgba(255, 243, 225, 0.75);
+}
+
+.entry-myposts .entry-desc {
+  color: #9a7d63;
+}
+
+.entry-arrow {
+  font-size: 32rpx;
+  color: rgba(255, 243, 225, 0.7);
+}
+
+.entry-myposts .entry-arrow {
+  color: #b5967a;
+}
+
 .hero {
   background: linear-gradient(135deg, rgba(59, 43, 33, 0.96) 0%, rgba(90, 66, 50, 0.92) 58%, rgba(163, 118, 74, 0.88) 100%);
   border-radius: 36rpx;
@@ -320,4 +409,272 @@
   font-size: 24rpx;
   line-height: 1.9;
   color: #8c6f56;
+}
+
+/* ===== 发布入口卡片 ===== */
+.publish-card {
+  background: linear-gradient(135deg, rgba(59, 43, 33, 0.96) 0%, rgba(90, 66, 50, 0.92) 58%, rgba(163, 118, 74, 0.88) 100%);
+  border-radius: 36rpx;
+  padding: 32rpx;
+  box-shadow: 0 20rpx 50rpx rgba(69, 43, 20, 0.18);
+  color: #fff9f1;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.publish-header {
+  margin-bottom: 24rpx;
+}
+
+.publish-eyebrow {
+  display: block;
+  font-size: 20rpx;
+  letter-spacing: 6rpx;
+  color: rgba(255, 243, 225, 0.72);
+  margin-bottom: 10rpx;
+}
+
+.publish-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #fffaf3;
+  margin-bottom: 10rpx;
+}
+
+.publish-desc {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: rgba(255, 243, 225, 0.8);
+}
+
+.publish-image-zone {
+  margin-bottom: 24rpx;
+  border-radius: 22rpx;
+  overflow: hidden;
+  background: rgba(255, 247, 236, 0.12);
+  border: 2rpx dashed rgba(255, 240, 220, 0.35);
+  min-height: 240rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.publish-image-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 40rpx;
+}
+
+.publish-image-icon {
+  font-size: 72rpx;
+  color: rgba(255, 243, 225, 0.6);
+  line-height: 1;
+}
+
+.publish-image-tip {
+  font-size: 26rpx;
+  color: rgba(255, 243, 225, 0.72);
+}
+
+.publish-image-preview {
+  position: relative;
+  width: 100%;
+}
+
+.publish-preview-img {
+  width: 100%;
+  height: 360rpx;
+  display: block;
+}
+
+.publish-image-change {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 10rpx 20rpx;
+  background: rgba(46, 30, 20, 0.6);
+  color: #fff9f1;
+  font-size: 22rpx;
+  border-top-left-radius: 12rpx;
+}
+
+.publish-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.form-label {
+  font-size: 24rpx;
+  color: rgba(255, 243, 225, 0.86);
+  font-weight: 600;
+}
+
+.form-textarea {
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 247, 236, 0.14);
+  border: 1rpx solid rgba(255, 240, 220, 0.2);
+  font-size: 26rpx;
+  color: #fffaf2;
+  min-height: 120rpx;
+  line-height: 1.7;
+}
+
+.form-placeholder {
+  color: rgba(255, 243, 225, 0.42);
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 247, 236, 0.14);
+  border: 1rpx solid rgba(255, 240, 220, 0.2);
+  min-height: 72rpx;
+  align-items: center;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 247, 236, 0.2);
+  border: 1rpx solid rgba(255, 240, 220, 0.28);
+}
+
+.tag-chip-text {
+  font-size: 22rpx;
+  color: #fff8ef;
+}
+
+.tag-chip-del {
+  font-size: 24rpx;
+  color: rgba(255, 243, 225, 0.6);
+  line-height: 1;
+}
+
+.tag-input {
+  flex: 1;
+  min-width: 160rpx;
+  height: 52rpx;
+  font-size: 24rpx;
+  color: #fffaf2;
+}
+
+/* 固定风格标签选择按钮 */
+.style-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.style-tag-btn {
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 247, 236, 0.14);
+  border: 1rpx solid rgba(255, 240, 220, 0.28);
+}
+
+.style-tag-active {
+  background: rgba(255, 248, 238, 0.95);
+  border-color: rgba(255, 248, 238, 0.95);
+}
+
+.style-tag-text {
+  font-size: 26rpx;
+  color: rgba(255, 243, 225, 0.86);
+}
+
+.style-tag-active .style-tag-text {
+  color: #4c3625;
+  font-weight: 700;
+}
+
+.publish-btn {
+  width: 100%;
+  border: none;
+  border-radius: 999rpx;
+  background: rgba(255, 248, 238, 0.95);
+  color: #4c3625;
+  font-size: 30rpx;
+  font-weight: 700;
+  padding: 22rpx 0;
+}
+
+.publish-btn::after {
+  border: none;
+}
+
+.publishing {
+  opacity: 0.7;
+}
+
+/* ===== 帖子列表 ===== */
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin: 14rpx 0;
+}
+
+.tag-item {
+  font-size: 22rpx;
+  color: #8b6344;
+  background: rgba(143, 101, 72, 0.1);
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+.outfit-time {
+  font-size: 22rpx;
+  color: #9a7d63;
+}
+
+/* 点赞/收藏/评论操作栏 */
+.action-bar {
+  display: flex;
+  gap: 32rpx;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid rgba(143, 101, 72, 0.1);
+}
+
+.action-btn-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.action-icon {
+  font-size: 32rpx;
+  color: #b5967a;
+}
+
+.icon-liked {
+  color: #e05a5a;
+}
+
+.icon-faved {
+  color: #d4a338;
+}
+
+.action-count {
+  font-size: 22rpx;
+  color: #9a7d63;
 }

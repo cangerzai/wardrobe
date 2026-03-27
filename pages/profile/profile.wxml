@@ -6,7 +6,6 @@
       <text class="hero-title">我的画册</text>
       <text class="hero-subtitle">在这里查看你的衣橱数据、收藏灵感与个人记录，把所有搭配整理成一份专属的数字衣橱档案。</text>
     </view>
-
     <view class="profile-shell">
       <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
       <view class="profile-copy">
@@ -25,24 +24,10 @@
       <text class="stat-label">穿搭记录</text>
       <text class="stat-value">{{outfitCount}}</text>
     </view>
-    <view class="stat-card accent-card">
+    <view class="stat-card accent-card" bindtap="goToFavorites">
       <text class="stat-label">我的收藏</text>
       <text class="stat-value">{{favoriteCount}}</text>
     </view>
-  </view>
-
-  <view class="section-head">
-    <view>
-      <text class="section-title">我的收藏</text>
-      <text class="section-subtitle">未来这里会沉淀你在发现页点过收藏的穿搭灵感</text>
-    </view>
-  </view>
-
-  <view class="favorites-empty">
-    <view class="empty-orb"></view>
-    <text class="empty-kicker">FAVORITE NOTES</text>
-    <text class="empty-title">你的收藏夹还很安静</text>
-    <text class="empty-desc">当你在发现页收藏喜欢的穿搭后，它们会出现在这里，变成你的专属灵感剪贴簿。</text>
   </view>
 
   <view class="section-head compact-head">
@@ -61,7 +46,6 @@
       </view>
       <text class="menu-arrow">→</text>
     </view>
-
     <view class="menu-item" bindtap="settings">
       <view class="menu-icon-wrap"><text class="menu-icon">⚙️</text></view>
       <view class="menu-copy">
@@ -70,7 +54,6 @@
       </view>
       <text class="menu-arrow">→</text>
     </view>
-
     <view class="menu-item" bindtap="about">
       <view class="menu-icon-wrap"><text class="menu-icon">ℹ️</text></view>
       <view class="menu-copy">

@@ -1,12 +1,15 @@
 // pages/profile/profile.js
 const app = getApp()
+const dbUtil = require('../../utils/db.js')
 
 Page({
   data: {
     userInfo: {},
     clothesCount: 0,
     outfitCount: 0,
-    favoriteCount: 0
+    favoriteCount: 0,
+    favoritePosts: [],
+    showFavSection: false
   },
 
   onLoad() {
@@ -17,30 +20,76 @@ Page({
     this.loadUserData()
   },
 
-  // 加载用户数据
   loadUserData() {
-    // 获取用户信息
     const userInfo = app.globalData.userInfo || {}
-    
-    // 获取统计数据
     const wardrobeData = wx.getStorageSync('wardrobeData') || []
-    
+
     this.setData({
-      userInfo: userInfo,
-      clothesCount: wardrobeData.length,
-      outfitCount: 0, // 实际项目中应从服务器获取
-      favoriteCount: 0 // 实际项目中应从服务器获取
+      userInfo,
+      clothesCount: wardrobeData.length
+    })
+
+    // 从云数据库拉收藏列表
+    dbUtil.getMyFavIds().then(favIds => {
+      if (favIds.length === 0) {
+        this.setData({ favoriteCount: 0, favoritePosts: [], outfitCount: 0 })
+        return
+      }
+      // 拉全部帖子，过滤出收藏的
+      return dbUtil.getPosts().then(posts => {
+        const favPosts = posts
+          .filter(p => favIds.includes(p._id))
+          .map(p => Object.assign({}, p, {
+            id: p._id,
+            image: p.imageUrl || p.imageFileID || ''
+          }))
+
+        // 我发布的帖子数
+        const myPosts = posts.filter(p => {
+          // 云数据库会自动注入 _openid，与当前用户匹配
+          return p._openid !== undefined
+        })
+
+        this.setData({
+          favoriteCount: favPosts.length,
+          favoritePosts: favPosts,
+          outfitCount: myPosts.length
+        })
+
+        // 批量刷新图片 URL
+        const needUrl = favPosts.filter(p => p.imageFileID && !p.imageUrl)
+        if (needUrl.length === 0) return
+        Promise.all(needUrl.map(p =>
+          dbUtil.getTempUrl(p.imageFileID).then(url => ({ id: p._id, url }))
+        )).then(results => {
+          const urlMap = {}
+          results.forEach(r => { urlMap[r.id] = r.url })
+          const updated = this.data.favoritePosts.map(p =>
+            urlMap[p._id] ? Object.assign({}, p, { image: urlMap[p._id] }) : p
+          )
+          this.setData({ favoritePosts: updated })
+        })
+      })
+    }).catch(err => {
+      console.error('加载收藏失败', err)
     })
   },
 
-  // 跳转到衣橱
+  goToFavorites() {
+    wx.navigateTo({ url: '/pages/myFavorites/myFavorites' })
+  },
+
+  toggleFavSection() {},
+
   goToWardrobe() {
-    wx.switchTab({
-      url: '/pages/wardrobe/wardrobe'
-    })
+    wx.switchTab({ url: '/pages/wardrobe/wardrobe' })
   },
 
-  // 数据管理
+  goToDetail(e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({ url: '/pages/postDetail/postDetail?id=' + id })
+  },
+
   manageData() {
     wx.showModal({
       title: '数据管理',
@@ -49,7 +98,6 @@ Page({
     })
   },
 
-  // 设置
   settings() {
     wx.showModal({
       title: '设置',
@@ -58,7 +106,6 @@ Page({
     })
   },
 
-  // 关于
   about() {
     wx.showModal({
       title: '关于',
@@ -67,7 +114,6 @@ Page({
     })
   },
 
-  // 清空所有数据
   clearAllData() {
     wx.showModal({
       title: '确认清空',
@@ -76,37 +122,28 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.removeStorageSync('wardrobeData')
+          wx.removeStorageSync('likedIds')
           this.setData({
-            clothesCount: 0
+            clothesCount: 0,
+            outfitCount: 0,
+            favoriteCount: 0,
+            favoritePosts: []
           })
-          wx.showToast({
-            title: '已清空',
-            icon: 'success'
-          })
+          wx.showToast({ title: '已清空', icon: 'success' })
         }
       }
     })
   },
 
-  // 导出数据
   exportData() {
     const wardrobeData = wx.getStorageSync('wardrobeData') || []
-    
     if (wardrobeData.length === 0) {
-      wx.showToast({
-        title: '暂无数据可导出',
-        icon: 'none'
-      })
+      wx.showToast({ title: '暂无数据可导出', icon: 'none' })
       return
     }
-
-    // 将数据转换为JSON字符串
-    const dataStr = JSON.stringify(wardrobeData, null, 2)
-    
-    // 实际项目中可以将数据上传到云存储或发送到服务器
     wx.showModal({
       title: '导出数据',
-      content: `共 ${wardrobeData.length} 条数据\n\n实际项目中可以将数据导出为文件或上传到云端`,
+      content: `共 ${wardrobeData.length} 条衣橱数据`,
       showCancel: false
     })
   }

@@ -1,0 +1,41 @@
+<!-- pages/myFavorites/myFavorites.wxml -->
+<view class="page">
+  <view class="header">
+    <text class="header-title">我的收藏</text>
+    <text class="header-sub">你在发现页点击★收藏的穿搭</text>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{postList.length === 0 && !loading}}">
+    <view class="empty-orb"></view>
+    <text class="empty-kicker">FAVORITE NOTES</text>
+    <text class="empty-title">你的收藏夹还很安静</text>
+    <text class="empty-desc">当你在发现页收藏喜欢的穿搭后，它们会出现在这里。</text>
+  </view>
+
+  <view class="fav-list" wx:if="{{postList.length > 0}}">
+    <view
+      class="fav-card"
+      wx:for="{{postList}}"
+      wx:key="id"
+      bindtap="goDetail"
+      data-id="{{item.id}}"
+    >
+      <image class="fav-image" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="fav-body">
+        <text class="fav-desc">{{item.desc || '无说明'}}</text>
+        <view class="fav-tags" wx:if="{{item.tags.length > 0}}">
+          <text class="fav-tag" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag"># {{tag}}</text>
+        </view>
+        <text class="fav-user">@{{item.username || '衣橱用户'}}</text>
+        <view class="fav-meta">
+          <text class="fav-stat">♥ {{item.likes}}</text>
+          <text class="fav-stat">💬 {{item.comments}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

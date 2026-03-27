@@ -1,0 +1,57 @@
+<!-- pages/publishPost/publishPost.wxml -->
+<view class="page">
+  <view class="header">
+    <text class="header-title">发布穿搭</text>
+    <text class="header-sub">上传图片，写下你的搭配灵感</text>
+  </view>
+
+  <view class="publish-image-zone" bindtap="choosePublishImage">
+    <view class="publish-image-preview" wx:if="{{publishImage}}">
+      <image class="publish-preview-img" src="{{publishImage}}" mode="aspectFill"></image>
+      <text class="publish-image-change">重新选择</text>
+    </view>
+    <view class="publish-image-empty" wx:else>
+      <text class="publish-image-icon">+</text>
+      <text class="publish-image-tip">点击上传穿搭图片</text>
+    </view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-row">
+      <text class="form-label">灵感说明</text>
+      <textarea
+        class="form-textarea"
+        placeholder="分享一下这套搭配的灵感或思路..."
+        bindinput="onDescInput"
+        value="{{publishDesc}}"
+        maxlength="200"
+        auto-height
+        placeholder-class="form-placeholder"
+      />
+      <text class="form-count">{{publishDesc.length}}/200</text>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">风格标签（最多选 2 个）</text>
+      <view class="style-tags-row">
+        <view
+          class="style-tag-btn {{publishTags[0] === item || publishTags[1] === item ? 'style-tag-active' : ''}}"
+          wx:for="{{styleOptions}}"
+          wx:key="*this"
+          catchtap="toggleTag"
+          data-tag="{{item}}"
+        >
+          <text class="style-tag-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button
+      class="publish-btn {{isPublishing ? 'publishing' : ''}}"
+      bindtap="publishOutfit"
+      loading="{{isPublishing}}"
+    >
+      <text>{{isPublishing ? '发布中...' : '发布穿搭'}}</text>
+    </button>
+  </view>
+</view>

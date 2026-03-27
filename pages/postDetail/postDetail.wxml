@@ -1,0 +1,74 @@
+<!-- pages/postDetail/postDetail.wxml -->
+<view class="page">
+
+  <view class="post-card" wx:if="{{post}}">
+    <image class="post-image" src="{{post.image}}" mode="aspectFill"></image>
+    <view class="post-body">
+      <view class="author-row">
+        <image class="avatar" src="/images/default-avatar.png" mode="aspectFill"></image>
+        <view class="author-copy">
+          <text class="username">{{post.username || '衣橱用户'}}</text>
+          <text class="post-time">{{post.timeLabel}}</text>
+        </view>
+      </view>
+      <text class="post-desc">{{post.desc}}</text>
+      <view class="tags-display" wx:if="{{post.tags.length > 0}}">
+        <text class="tag-item" wx:for="{{post.tags}}" wx:key="index" wx:for-item="tag"># {{tag}}</text>
+      </view>
+      <view class="action-bar">
+        <view class="action-btn-wrap" catchtap="toggleLike">
+          <text class="action-icon {{post.liked ? 'icon-liked' : ''}}">♥</text>
+          <text class="action-count">{{post.likes}}</text>
+        </view>
+        <view class="action-btn-wrap" catchtap="toggleFav">
+          <text class="action-icon {{post.faved ? 'icon-faved' : ''}}">★</text>
+          <text class="action-count">{{post.faved ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="comment-section">
+    <text class="comment-title">评论 {{post.comments}}</text>
+    <view class="comment-empty" wx:if="{{commentList.length === 0}}">
+      <text class="comment-empty-text">还没有评论，快来说点什么吧</text>
+    </view>
+    <view class="comment-list" wx:else>
+      <view class="comment-item" wx:for="{{commentList}}" wx:key="_id">
+        <image class="comment-avatar" src="/images/default-avatar.png" mode="aspectFill"></image>
+        <view class="comment-content">
+          <text class="comment-user">{{item.username || '我'}}</text>
+          <text class="comment-text">{{item.text}}</text>
+          <view class="comment-footer">
+            <text class="comment-time">{{item.timeLabel}}</text>
+            <view
+              class="comment-del-btn"
+              wx:if="{{item.isMine}}"
+              catchtap="deleteComment"
+              data-comment-id="{{item._id}}"
+            >
+              <text class="comment-del-icon">✕</text>
+              <text class="comment-del-text">删除</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="comment-input-bar">
+    <input
+      class="comment-input"
+      placeholder="写下你的评论..."
+      value="{{commentText}}"
+      bindinput="onCommentInput"
+      placeholder-class="comment-placeholder"
+      confirm-type="send"
+      bindconfirm="submitComment"
+    />
+    <view class="comment-send-btn" bindtap="submitComment">
+      <text class="comment-send-text">发送</text>
+    </view>
+  </view>
+
+</view>

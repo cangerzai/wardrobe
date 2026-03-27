@@ -52,15 +52,6 @@
       wx:for="{{clothesList}}"
       wx:key="id"
     >
-      <view class="look-card-head">
-        <view class="look-title-group">
-          <text class="look-index">LOOK {{index + 1}}</text>
-          <text class="look-name">{{item.name || '未命名单品'}}</text>
-          <text class="category-tag {{item.category === 'pants' ? 'tag-pants' : (item.category === 'top' ? 'tag-top' : 'tag-unknown')}}">{{item.categoryLabel || '未分类'}}</text>
-        </view>
-        <text class="look-date">{{item.date}}</text>
-      </view>
-
       <view class="look-images">
         <view class="image-pane soft-pane" wx:if="{{item.originalUrl}}" bindtap="previewClothes" data-index="{{index}}" data-type="original">
           <text class="pane-label">原图</text>
@@ -73,7 +64,10 @@
       </view>
 
       <view class="look-footer">
-        <text class="look-hint">点击左侧查看原图，点击右侧查看卡通图</text>
+        <view class="remark-row">
+          <text class="remark-label">备注：</text>
+          <input class="remark-input" type="text" placeholder="输入对这件衣服的备注" value="{{item.remark || ''}}" data-id="{{item.id}}" bindinput="onRemarkInput" />
+        </view>
         <text class="delete-btn" catchtap="deleteClothes" data-id="{{item.id}}">移出衣橱</text>
       </view>
     </view>

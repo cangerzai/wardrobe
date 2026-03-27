@@ -3,7 +3,11 @@
     "pages/index/index",
     "pages/wardrobe/wardrobe",
     "pages/discover/discover",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/postDetail/postDetail",
+    "pages/publishPost/publishPost",
+    "pages/myPosts/myPosts",
+    "pages/myFavorites/myFavorites"
   ],
   "window": {
     "backgroundTextStyle": "light",
