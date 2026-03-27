@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# 安装 mediapipe 所需的系统依赖
+# 安装 mediapipe 和 opencv 所需的系统依赖
 RUN apt-get update && apt-get install -y \
     libxcb1 \
     libxcb-shm0 \
