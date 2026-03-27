@@ -21,12 +21,15 @@ Page({
 
     for (let i = 0; i < wardrobeData.length; i++) {
       const item = wardrobeData[i]
-
+      item.cartoonUrl = ''
+      item.originalUrl = ''
+      // 先清空旧链接，避免加载过期 URL 触发 403
+      item.cartoonUrl = ''
+      item.originalUrl = ''
       try {
         if (item.cartoonFileID) {
           item.cartoonUrl = await this.getTempFileURL(item.cartoonFileID)
         }
-
         if (item.originalFileID) {
           item.originalUrl = await this.getTempFileURL(item.originalFileID)
         }
@@ -64,17 +67,12 @@ Page({
 
   // 上传并处理图片
   async uploadAndProcessImage(filePath) {
-    this.setData({
-      isProcessing: true
-    })
+    this.setData({ isProcessing: true })
 
     try {
       const originalFileID = await this.uploadToCloud(filePath)
 
-      wx.showLoading({
-        title: '正在处理...',
-        mask: true
-      })
+      wx.showLoading({ title: '正在处理...', mask: true })
 
       const originalUrl = await this.getTempFileURL(originalFileID)
       const transferResult = await styleTransferService.transferToCartoon(originalFileID)
@@ -99,21 +97,12 @@ Page({
       wardrobeData.unshift(newClothes)
       wx.setStorageSync('wardrobeData', wardrobeData)
 
-      this.setData({
-        clothesList: wardrobeData,
-        isProcessing: false
-      })
-
+      this.setData({ clothesList: wardrobeData, isProcessing: false })
       wx.hideLoading()
-      wx.showToast({
-        title: '上传成功',
-        icon: 'success'
-      })
+      wx.showToast({ title: '上传成功', icon: 'success' })
     } catch (error) {
       console.error('处理图片失败', error)
-      this.setData({
-        isProcessing: false
-      })
+      this.setData({ isProcessing: false })
       wx.hideLoading()
       wx.showToast({
         title: error.message || '处理失败',
@@ -127,16 +116,11 @@ Page({
   async uploadToCloud(filePath) {
     return new Promise((resolve, reject) => {
       const cloudPath = `clothes/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`
-
       wx.cloud.uploadFile({
         cloudPath,
         filePath,
-        success: res => {
-          resolve(res.fileID)
-        },
-        fail: err => {
-          reject(err)
-        }
+        success: res => resolve(res.fileID),
+        fail: err => reject(err)
       })
     })
   },
@@ -170,16 +154,35 @@ Page({
       : (item.cartoonUrl || item.originalUrl)
 
     if (!targetUrl) {
-      wx.showToast({
-        title: '图片暂不可预览',
-        icon: 'none'
-      })
+      wx.showToast({ title: '图片暂不可预览', icon: 'none' })
       return
     }
 
-    wx.previewImage({
-      urls: [targetUrl],
-      current: targetUrl
+    wx.previewImage({ urls: [targetUrl], current: targetUrl })
+  },
+
+  // 长按分类标签，手动修改分类
+  onCategoryLongPress(e) {
+    const id = e.currentTarget.dataset.id
+    wx.showActionSheet({
+      itemList: ['上衣', '裤子', '未分类'],
+      success: (res) => {
+        const categories = [
+          { category: 'top', categoryLabel: '上衣' },
+          { category: 'pants', categoryLabel: '裤子' },
+          { category: 'unknown', categoryLabel: '未分类' }
+        ]
+        const selected = categories[res.tapIndex]
+        const wardrobeData = this.data.clothesList.map(item => {
+          if (item.id === id) {
+            return { ...item, category: selected.category, categoryLabel: selected.categoryLabel }
+          }
+          return item
+        })
+        wx.setStorageSync('wardrobeData', wardrobeData)
+        this.setData({ clothesList: wardrobeData })
+        wx.showToast({ title: '分类已更新', icon: 'success' })
+      }
     })
   },
 
@@ -189,16 +192,12 @@ Page({
     const remark = e.detail.value
 
     const wardrobeData = this.data.clothesList.map(item => {
-      if (item.id === id) {
-        return { ...item, remark }
-      }
+      if (item.id === id) return { ...item, remark }
       return item
     })
 
     wx.setStorageSync('wardrobeData', wardrobeData)
-    this.setData({
-      clothesList: wardrobeData
-    })
+    this.setData({ clothesList: wardrobeData })
   },
 
   // 删除服装
@@ -212,14 +211,8 @@ Page({
         if (res.confirm) {
           const wardrobeData = this.data.clothesList.filter(item => item.id !== id)
           wx.setStorageSync('wardrobeData', wardrobeData)
-          this.setData({
-            clothesList: wardrobeData
-          })
-
-          wx.showToast({
-            title: '删除成功',
-            icon: 'success'
-          })
+          this.setData({ clothesList: wardrobeData })
+          wx.showToast({ title: '删除成功', icon: 'success' })
         }
       }
     })

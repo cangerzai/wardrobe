@@ -52,6 +52,18 @@
       wx:for="{{clothesList}}"
       wx:key="id"
     >
+      <!-- 分类标签行：图片上方靠左 -->
+      <view class="look-category-row">
+        <view
+          class="category-badge {{item.category === 'top' ? 'badge-top' : (item.category === 'pants' ? 'badge-pants' : 'badge-unknown')}}"
+          bindlongpress="onCategoryLongPress"
+          data-id="{{item.id}}"
+        >
+          <text class="category-badge-text">{{item.categoryLabel || '未分类'}}</text>
+          <view class="category-badge-edit"></view>
+        </view>
+      </view>
+
       <view class="look-images">
         <view class="image-pane soft-pane" wx:if="{{item.originalUrl}}" bindtap="previewClothes" data-index="{{index}}" data-type="original">
           <text class="pane-label">原图</text>

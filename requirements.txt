@@ -4,4 +4,4 @@ pillow
 numpy
 opencv-python-headless
 onnxruntime
-mediapipe
+mediapipe==0.10.14

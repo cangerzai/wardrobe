@@ -63,42 +63,55 @@ CATEGORY_LABELS = {
 
 def remove_background(pil_img: Image.Image) -> Image.Image:
     """
-    针对白底/浅色背景商品图的自动抠图。
-    返回带透明通道（RGBA）的 PIL Image。
+    用 GrabCut + 边缘泛洪双策略抠图。
+    对浅色服装（白/米/浅灰）也能保留完整前景。
     """
     img_rgb = np.array(pil_img.convert("RGB"))
+    img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
     h, w = img_rgb.shape[:2]
 
+    # ── 1. GrabCut：以图像边框向内 10px 为矩形初始化 ──
+    margin = max(2, min(10, h // 20, w // 20))
+    rect = (margin, margin, w - margin * 2, h - margin * 2)
+    bgd_model = np.zeros((1, 65), np.float64)
+    fgd_model = np.zeros((1, 65), np.float64)
+    gc_mask = np.zeros((h, w), np.uint8)
+    try:
+        cv2.grabCut(img_bgr, gc_mask, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
+        grabcut_fg = np.where((gc_mask == cv2.GC_FGD) | (gc_mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
+    except Exception:
+        grabcut_fg = np.ones((h, w), np.uint8) * 255
+
+    # ── 2. 边缘泛洪：从四角泛洪识别纯色背景 ──
     img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV)
     S = img_hsv[:, :, 1]
     V = img_hsv[:, :, 2]
-
-    bg_mask = ((V > 220) & (S < 40)).astype(np.uint8) * 255
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    bg_mask = ((V > 200) & (S < 60)).astype(np.uint8) * 255
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     bg_mask = cv2.morphologyEx(bg_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
-    bg_mask = cv2.morphologyEx(bg_mask, cv2.MORPH_DILATE, kernel, iterations=1)
 
     flood_mask = np.zeros((h + 2, w + 2), np.uint8)
     bg_flood = bg_mask.copy()
-    corners = [(0, 0), (0, w - 1), (h - 1, 0), (h - 1, w - 1)]
-    for r, c in corners:
+    for r, c in [(0, 0), (0, w - 1), (h - 1, 0), (h - 1, w - 1)]:
         if bg_mask[r, c] == 255:
             cv2.floodFill(bg_flood, flood_mask, (c, r), 128)
     edge_bg = (bg_flood == 128).astype(np.uint8) * 255
+    flood_fg = cv2.bitwise_not(edge_bg)
 
-    fg_mask = cv2.bitwise_not(edge_bg)
-    fg_mask = cv2.morphologyEx(
-        fg_mask,
-        cv2.MORPH_ERODE,
-        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)),
-        iterations=1
-    )
-    alpha = cv2.GaussianBlur(fg_mask, (5, 5), 0)
+    # ── 3. 合并：两种方法取并集（宁可保留多一点前景）──
+    combined_fg = cv2.bitwise_or(grabcut_fg, flood_fg)
 
-    r_ch = img_rgb[:, :, 0]
-    g_ch = img_rgb[:, :, 1]
-    b_ch = img_rgb[:, :, 2]
+    # ── 4. 形态学后处理：填洞 + 去锯齿 ──
+    kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    combined_fg = cv2.morphologyEx(combined_fg, cv2.MORPH_CLOSE, kernel2, iterations=3)
+    combined_fg = cv2.morphologyEx(combined_fg, cv2.MORPH_ERODE,
+                                   cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)),
+                                   iterations=1)
+
+    # ── 5. 平滑 alpha 边缘 ──
+    alpha = cv2.GaussianBlur(combined_fg, (5, 5), 0)
+
+    r_ch, g_ch, b_ch = img_rgb[:, :, 0], img_rgb[:, :, 1], img_rgb[:, :, 2]
     rgba = np.dstack([r_ch, g_ch, b_ch, alpha])
     return Image.fromarray(rgba, "RGBA")
 
@@ -158,19 +171,21 @@ def classify_garment(pil_img: Image.Image):
 
 # ─── MediaPipe Pose ───────────────────────────────────
 _mp_pose = None
-_mp_drawing = None
 
 def _get_mp_pose():
     global _mp_pose
     if _mp_pose is None:
-        import mediapipe as mp
-        _mp_pose = mp.solutions.pose.Pose(
-            static_image_mode=True,
-            model_complexity=1,
-            enable_segmentation=False,
-            min_detection_confidence=0.5
-        )
-    return _mp_pose
+        try:
+            import mediapipe as mp
+            _mp_pose = mp.solutions.pose.Pose(
+                static_image_mode=True,
+                model_complexity=1,
+                enable_segmentation=False,
+                min_detection_confidence=0.5
+            )
+        except ImportError:
+            _mp_pose = False  # mediapipe 未安装，标记为不可用
+    return _mp_pose if _mp_pose else None
 
 
 def detect_pose(pil_img: Image.Image) -> dict:

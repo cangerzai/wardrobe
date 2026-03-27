@@ -6,7 +6,7 @@
     <view class="hero-copy">
       <text class="eyebrow">LOOKBOOK</text>
       <text class="hero-title">虚拟试衣间</text>
-      <text class="hero-subtitle">选择分类，左右滑动切换服装，查看穿搭效果。</text>
+      <text class="hero-subtitle">选择分类，左右滑动切换服装，两件同时搭配预览。</text>
     </view>
   </view>
 
@@ -20,8 +20,12 @@
         <text class="selector-arrow">{{showDropdown ? '▲' : '▼'}}</text>
       </view>
       <view class="dropdown-menu" wx:if="{{showDropdown}}">
-        <view class="dropdown-item {{activeCategory === 'top' ? 'active' : ''}}" bindtap="selectCategory" data-cat="top" data-label="上衣">上衣</view>
-        <view class="dropdown-item {{activeCategory === 'pants' ? 'active' : ''}}" bindtap="selectCategory" data-cat="pants" data-label="裤子">裤子</view>
+        <view class="dropdown-item {{activeCategory === 'top' ? 'active' : ''}}" bindtap="selectCategory" data-cat="top" data-label="上衣">
+          <text>上衣</text>
+        </view>
+        <view class="dropdown-item {{activeCategory === 'pants' ? 'active' : ''}}" bindtap="selectCategory" data-cat="pants" data-label="裤子">
+          <text>裤子</text>
+        </view>
       </view>
     </view>
 
@@ -32,16 +36,26 @@
       bindtouchend="onTouchEnd"
     >
       <!-- 模特底图 -->
-      <image class="model-img" src="/images/model.png" mode="aspectFit"></image>
+      <image class="model-img" src="/images/model.png" mode="scaleToFill"></image>
 
-      <!-- 服装叠加层（上衣）-->
-      <view class="clothes-overlay top-overlay" wx:if="{{activeCategory === 'top' && currentClothes.cartoonUrl}}">
-        <image class="clothes-img" src="{{currentClothes.cartoonUrl}}" mode="aspectFit"></image>
+      <!-- 上衣叠加层（始终显示已选上衣）-->
+      <view style="{{topStyle}}" wx:if="{{selectedTop && selectedTop.cartoonUrl}}">
+        <image
+          class="clothes-img"
+          src="{{selectedTop.cartoonUrl}}"
+          mode="aspectFit"
+          style="width:100%;height:100%;"
+        ></image>
       </view>
 
-      <!-- 服装叠加层（裤子）-->
-      <view class="clothes-overlay pants-overlay" wx:if="{{activeCategory === 'pants' && currentClothes.cartoonUrl}}">
-        <image class="clothes-img" src="{{currentClothes.cartoonUrl}}" mode="aspectFit"></image>
+      <!-- 裤子叠加层（始终显示已选裤子，z-index 低于上衣）-->
+      <view style="{{pantsStyle}}" wx:if="{{selectedPants && selectedPants.cartoonUrl}}">
+        <image
+          class="clothes-img"
+          src="{{selectedPants.cartoonUrl}}"
+          mode="aspectFit"
+          style="width:100%;height:100%;"
+        ></image>
       </view>
 
       <!-- 空状态提示 -->
@@ -56,9 +70,12 @@
       </view>
     </view>
 
-    <!-- 当前服装信息 -->
+    <!-- 当前分类服装信息 -->
     <view class="clothes-info" wx:if="{{filteredList.length > 0}}">
-      <text class="clothes-name">{{currentClothes.name || '服装单品'}}</text>
+      <view class="outfit-summary">
+        <text class="outfit-label">当前{{categoryLabel}}</text>
+        <text class="clothes-name">{{currentClothes.name || '服装单品'}}</text>
+      </view>
       <view class="clothes-index">
         <text class="clothes-index-text">{{currentFilterIndex + 1}} / {{filteredList.length}}</text>
       </view>
