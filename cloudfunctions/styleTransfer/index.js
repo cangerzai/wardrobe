@@ -88,7 +88,7 @@ exports.main = async (event) => {
 
     // 3. 上传处理结果到云存储
     const uploadRes = await cloud.uploadFile({
-      cloudPath: `cartoon/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`,
+      cloudPath: `cartoon/${Date.now()}-${Math.random().toString(36).slice(2)}.png`,
       fileContent: outputBuffer
     })
 
