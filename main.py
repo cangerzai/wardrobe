@@ -63,58 +63,61 @@ CATEGORY_LABELS = {
 
 def remove_background(pil_img: Image.Image) -> Image.Image:
     """
-    用 GrabCut + 边缘泛洪双策略抠图。
-    对浅色服装（白/米/浅灰）也能保留完整前景。
+    针对白底/浅色背景商品图的自动抠图。
+    返回带透明通道（RGBA）的 PIL Image。
     """
     img_rgb = np.array(pil_img.convert("RGB"))
-    img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
     h, w = img_rgb.shape[:2]
 
-    # ── 1. GrabCut：以图像边框向内 10px 为矩形初始化 ──
-    margin = max(2, min(10, h // 20, w // 20))
-    rect = (margin, margin, w - margin * 2, h - margin * 2)
-    bgd_model = np.zeros((1, 65), np.float64)
-    fgd_model = np.zeros((1, 65), np.float64)
-    gc_mask = np.zeros((h, w), np.uint8)
-    try:
-        cv2.grabCut(img_bgr, gc_mask, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
-        grabcut_fg = np.where((gc_mask == cv2.GC_FGD) | (gc_mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
-    except Exception:
-        grabcut_fg = np.ones((h, w), np.uint8) * 255
-
-    # ── 2. 边缘泛洪：从四角泛洪识别纯色背景 ──
+    # ── 1. Lab 亮度 + HSV 双通道背景检测 ──
+    img_lab = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2LAB)
+    L = img_lab[:, :, 0]
     img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV)
     S = img_hsv[:, :, 1]
     V = img_hsv[:, :, 2]
-    bg_mask = ((V > 200) & (S < 60)).astype(np.uint8) * 255
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    bg_mask = cv2.morphologyEx(bg_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
 
+    # 背景：高亮度 + 低饱和（白/灰色区域）
+    bg_mask = ((V > 220) & (S < 40)).astype(np.uint8) * 255
+
+    # ── 2. 形态学处理：CLOSE + DILATE ──
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    bg_mask = cv2.morphologyEx(bg_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+    bg_mask = cv2.morphologyEx(bg_mask, cv2.MORPH_DILATE, kernel, iterations=1)
+
+    # ── 3. 边缘连通域泛洪填充 ──
     flood_mask = np.zeros((h + 2, w + 2), np.uint8)
     bg_flood = bg_mask.copy()
-    for r, c in [(0, 0), (0, w - 1), (h - 1, 0), (h - 1, w - 1)]:
+    corners = [(0, 0), (0, w - 1), (h - 1, 0), (h - 1, w - 1)]
+    for r, c in corners:
         if bg_mask[r, c] == 255:
             cv2.floodFill(bg_flood, flood_mask, (c, r), 128)
     edge_bg = (bg_flood == 128).astype(np.uint8) * 255
-    flood_fg = cv2.bitwise_not(edge_bg)
 
-    # ── 3. 合并：两种方法取并集（宁可保留多一点前景）──
-    combined_fg = cv2.bitwise_or(grabcut_fg, flood_fg)
+    # ── 4. 前景 mask ──
+    fg_mask = cv2.bitwise_not(edge_bg)
 
-    # ── 4. 形态学后处理：填洞 + 去锯齿 ──
-    kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    combined_fg = cv2.morphologyEx(combined_fg, cv2.MORPH_CLOSE, kernel2, iterations=3)
-    combined_fg = cv2.morphologyEx(combined_fg, cv2.MORPH_ERODE,
-                                   cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)),
-                                   iterations=1)
+    # ── 5. 检测是否为深色服装，动态调整腐蚀强度 ──
+    # 取前景区域的平均明度，判断是深色还是浅色服装
+    fg_pixels_V = V[fg_mask > 128]
+    is_dark = len(fg_pixels_V) > 0 and float(np.mean(fg_pixels_V)) < 130
 
-    # ── 5. 平滑 alpha 边缘 ──
-    alpha = cv2.GaussianBlur(combined_fg, (5, 5), 0)
+    if is_dark:
+        # 深色服装：更激进的腐蚀，去掉白色背景边缘残留
+        erode_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_ERODE, erode_kernel, iterations=3)
+        fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_DILATE, erode_kernel, iterations=2)
+    else:
+        # 浅色服装：轻微腐蚀即可
+        erode_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_ERODE, erode_kernel, iterations=1)
 
+    # ── 6. 高斯模糊 alpha 边缘 ──
+    alpha = cv2.GaussianBlur(fg_mask, (5, 5), 0)
+
+    # ── 7. 合成 RGBA ──
     r_ch, g_ch, b_ch = img_rgb[:, :, 0], img_rgb[:, :, 1], img_rgb[:, :, 2]
     rgba = np.dstack([r_ch, g_ch, b_ch, alpha])
     return Image.fromarray(rgba, "RGBA")
-
 
 def to_multiple(x: int, is_tiny: bool = False) -> int:
     if is_tiny:
@@ -261,15 +264,19 @@ def cartoonize(req: CartoonizeReq):
         img_bytes = base64.b64decode(req.imageBase64)
         pil_img = Image.open(BytesIO(img_bytes)).convert("RGB")
 
+        # 1. 分类（用原图分类更准确）
         category, score = classify_garment(pil_img)
         category_label = CATEGORY_LABELS.get(category, CATEGORY_LABELS["unknown"])
 
+        # 2. 卡通化
         input_tensor, original_size = preprocess_image(pil_img, MODEL_PATH)
         outputs = session.run(None, {input_name: input_tensor})
         cartoon_rgb = postprocess_image(outputs[0], original_size)
 
+        # 3. 对卡通化结果去背景（输出透明 PNG）
         cartoon_rgba = remove_background(cartoon_rgb)
 
+        # 4. 编码为 PNG base64（保留透明通道）
         out_buf = BytesIO()
         cartoon_rgba.save(out_buf, format="PNG")
         out_b64 = base64.b64encode(out_buf.getvalue()).decode("utf-8")
