@@ -156,30 +156,38 @@ Page({
   },
 
   async loadWardrobeData() {
-    const wardrobeData = wx.getStorageSync('wardrobeData') || []
+    const snapshot = wx.getStorageSync('wardrobeData') || []
+    const tempUrlMap = {}
 
-    for (let i = 0; i < wardrobeData.length; i++) {
-      const item = wardrobeData[i]
-      // 先清空旧链接，避免加载过期 URL
-      item.cartoonUrl = ''
-      item.originalUrl = ''
+    for (let i = 0; i < snapshot.length; i++) {
+      const item = snapshot[i]
+      const nextItem = { ...item, cartoonUrl: '', originalUrl: '' }
       try {
         if (item.cartoonFileID) {
-          item.cartoonUrl = await this.getTempFileURL(item.cartoonFileID)
+          nextItem.cartoonUrl = await this.getTempFileURL(item.cartoonFileID)
         }
         if (item.originalFileID) {
-          item.originalUrl = await this.getTempFileURL(item.originalFileID)
+          nextItem.originalUrl = await this.getTempFileURL(item.originalFileID)
         }
       } catch (e) {
         console.warn('刷新临时链接失败', e)
       }
+      tempUrlMap[nextItem.id] = nextItem
     }
 
-    wx.setStorageSync('wardrobeData', wardrobeData)
-    this.setData({ allClothesList: wardrobeData })
+    // 最终以最新 storage 为准，避免旧快照回写覆盖
+    const latest = wx.getStorageSync('wardrobeData') || []
+    const merged = latest.map(item => {
+      const cached = tempUrlMap[item.id]
+      return cached
+        ? { ...item, cartoonUrl: cached.cartoonUrl, originalUrl: cached.originalUrl }
+        : { ...item, cartoonUrl: '', originalUrl: '' }
+    })
+
+    this.setData({ allClothesList: merged })
 
     // 重新过滤，并强制刷新当前选中的服装（如果是新添加的）
-    this.applyFilter(this.data.activeCategory, wardrobeData)
+    this.applyFilter(this.data.activeCategory, merged)
 
     // 若 pose 已加载，重新计算样式
     if (this.data.pose) {

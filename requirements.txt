@@ -1,7 +1,7 @@
-fastapi
-uvicorn[standard]
-pillow
-numpy
-opencv-python-headless
-onnxruntime
+fastapi==0.115.2
+uvicorn[standard]==0.30.6
+pillow==10.4.0
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+onnxruntime==1.19.2
 mediapipe==0.10.14

@@ -1,134 +1,95 @@
-# 个性化电子衣橱微信小程序
+# 电子衣橱（微信小程序 + 云函数 + FastAPI）
 
-一个帮助用户管理服装、进行风格迁移（卡通化）和预览穿搭效果的微信小程序。
+本项目是一个可上传服装、自动卡通化并在模特图上进行虚拟试衣的微信小程序。
 
-## 功能特性
+## 当前核心能力
 
-- 📸 **图片上传**：支持从相册或相机上传服装图片
-- 🎨 **风格迁移**：自动将服装图片转换为卡通风格
-- 👤 **卡通小人模型**：在首页展示基础卡通小人，支持换装预览
-- 👔 **衣橱管理**：管理个人服装收藏，支持删除和预览
-- 🔍 **发现页面**：浏览其他用户的穿搭分享（待完善）
-- 👤 **个人中心**：查看统计数据和管理个人数据
+- 衣橱页上传服装并调用云函数处理
+- 云函数转发到 Python 服务进行卡通化与分类
+- 自动输出分类：`top`（上衣）/`pants`（裤子）/`unknown`（未分类）
+- 支持手动修正分类、备注、删除
+- 首页按分类试衣、滑动切换、按姿态关键点叠加
+- 裤子支持 `waistOffset`、`waistOffsetX` 的动态补偿
 
 ## 项目结构
 
-```
+```text
 电子衣橱/
-├── app.js                 # 小程序入口文件
-├── app.json              # 小程序全局配置
-├── app.wxss              # 小程序全局样式
-├── project.config.json   # 项目配置文件
-├── sitemap.json          # 站点地图配置
-├── pages/                # 页面目录
-│   ├── index/            # 首页（卡通小人+换装）
-│   ├── wardrobe/         # 衣橱页面（上传+列表）
-│   ├── discover/         # 发现页面
-│   └── profile/          # 我的页面
-└── utils/                # 工具函数
-    └── styleTransfer.js  # 风格迁移服务
+├── app.js
+├── app.json
+├── main.py                         # FastAPI 推理服务
+├── requirements.txt                # Python 依赖
+├── cloudfunctions/
+│   ├── getOpenid/
+│   ├── styleTransfer/              # 云函数：调用 Python 服务并回传 fileID
+│   └── toggleLike/
+├── pages/
+│   ├── index/                      # 虚拟试衣间
+│   ├── wardrobe/                   # 衣橱
+│   ├── discover/
+│   ├── profile/
+│   ├── postDetail/
+│   ├── publishPost/
+│   ├── myPosts/
+│   └── myFavorites/
+└── utils/
+    ├── db.js
+    └── styleTransfer.js
 ```
 
-## 技术栈
+## 环境要求
 
-- **前端框架**：微信小程序原生开发（WXML、WXSS、JS）
-- **Canvas**：用于绘制卡通小人和换装交互
-- **数据存储**：微信本地存储（localStorage）
-- **云服务**：支持微信云开发（可选）
+- 微信开发者工具（最新稳定版）
+- Python 3.10+
+- Node.js 18+（用于本地安装云函数依赖，推荐）
 
-## 快速开始
+## 后端启动（FastAPI）
 
-### 1. 配置小程序
+1. 安装依赖
 
-1. 使用微信开发者工具打开项目
-2. 在 `project.config.json` 中配置你的 `appid`
-3. 如需使用云开发，在 `app.js` 中配置云环境ID
-
-### 2. 配置风格迁移服务
-
-目前项目中使用模拟的风格迁移服务。要使用真实的风格迁移API，请修改 `utils/styleTransfer.js`：
-
-#### 方案1：使用云函数
-```javascript
-// 在 utils/styleTransfer.js 中
-return await callCloudFunction(imagePath)
+```bash
+pip install -r requirements.txt
 ```
 
-#### 方案2：使用第三方API
-```javascript
-// 在 utils/styleTransfer.js 中
-return await callThirdPartyAPI(imagePath)
-// 并配置API地址和密钥
+2. 启动服务
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-#### 推荐的风格迁移服务：
-- **腾讯云图像处理**：https://cloud.tencent.com/product/tiia
-- **阿里云图像处理**：https://www.aliyun.com/product/imagerecog
-- **自建服务**：使用 CartoonGAN、AnimeGAN 等预训练模型
+3. 健康检查
 
-### 3. 运行项目
+访问：`http://127.0.0.1:8000/health`
 
-1. 在微信开发者工具中点击"编译"
-2. 在模拟器或真机上预览效果
+> 如部署到云托管，请将云函数 `cloudfunctions/styleTransfer/index.js` 中 `CARTOON_API_BASE_URL` 配置为你的实际地址。
 
-## 功能说明
+## 云函数部署建议
 
-### 首页
-- 展示基础卡通小人模型（使用Canvas绘制）
-- 左右滑动切换不同的服装
-- 显示当前服装信息
+优先使用“本地安装依赖 + 上传所有文件”：
 
-### 衣橱页面
-- 点击"上传新服装"按钮选择图片
-- 自动进行风格迁移处理
-- 展示所有已上传的服装列表
-- 支持预览和删除服装
+```bash
+cd cloudfunctions/styleTransfer && npm install
+cd ../getOpenid && npm install
+cd ../toggleLike && npm install
+```
 
-### 发现页面
-- 浏览其他用户的穿搭分享（目前为模拟数据）
-- 支持搜索和分类筛选
+在微信开发者工具中对每个云函数执行：
+- 上传并部署：**所有文件**
 
-### 我的页面
-- 查看个人统计信息
-- 数据管理和设置
-- 导出和清空数据
+## 小程序上传前检查清单
 
-## 开发注意事项
+1. `app.json` 页面路径和 tabBar 图标路径存在
+2. 云函数已成功部署（尤其 `styleTransfer`）
+3. `styleTransfer` 云函数中的 Python 服务地址可访问
+4. `main.py` 对应服务已部署且模型文件存在（`models/animeganv3.onnx`）
+5. 真机测试过：上传、分类修改、删除、首页试衣切换
 
-### 图片处理性能优化
-- 上传时使用压缩图片（`sizeType: ['compressed']`）
-- 大图片建议先压缩再处理
-- 考虑使用CDN存储处理后的图片
+## 已知注意事项
 
-### 数据存储
-- 当前使用本地存储，数据仅在当前设备
-- 生产环境建议使用云数据库或自有服务器
-- 图片建议上传到云存储
-
-### 风格迁移API调用
-- 注意API调用频率限制
-- 考虑成本控制（按量计费）
-- 可以添加缓存机制避免重复处理
-
-### Canvas兼容性
-- 不同设备Canvas性能差异较大
-- 建议对Canvas尺寸进行适配
-- 考虑使用WebGL提升性能
-
-## 待完善功能
-
-- [ ] 真实的风格迁移API集成
-- [ ] 云数据库和云存储集成
-- [ ] 用户登录和授权
-- [ ] 穿搭分享功能
-- [ ] 服装分类和标签
-- [ ] 穿搭推荐算法
-- [ ] 社交互动（点赞、评论）
+- 如果衣橱删除后“又出现”，通常是并发刷新导致旧快照覆盖，需要使用 latest storage + 请求序号防并发方案。
+- 首次上传新服装后首页不显示，通常是当前筛选分类不同，请切换分类确认。
+- 裤子/上衣贴合依赖姿态关键点与参数，换模特图后建议重新校准 `pages/index/index.js`。
 
 ## 许可证
 
-MIT License
-
-## 联系方式
-
-如有问题或建议，欢迎提交Issue或Pull Request。
+MIT
