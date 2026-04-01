@@ -44,12 +44,19 @@ Page({
       dbUtil.getMyFavIds()
     ]).then(results => {
       const posts = results[0]
-      const favIds = results[1]
+      const dbFavIds = results[1]
       const likedIds = wx.getStorageSync('likedIds') || []
+      // 合并云端收藏和本地缓存收藏，取并集
+      const localFavIds = wx.getStorageSync('favIds') || []
+      const favIds = Array.from(new Set([...dbFavIds, ...localFavIds]))
+      // 同步本地缓存
+      wx.setStorageSync('favIds', favIds)
+      const favsMap = wx.getStorageSync('favsMap') || {}
       const decorated = posts.map(p => Object.assign({}, p, {
         id: p._id,
         liked: likedIds.includes(p._id),
         faved: favIds.includes(p._id),
+        favs: favsMap[p._id] !== undefined ? favsMap[p._id] : (p.favs || 0),
         image: p.imageUrl || p.imageFileID || '',
         timeLabel: formatTime(p.publishTime)
       }))
@@ -138,13 +145,27 @@ Page({
     const post = this.data.outfitList.find(p => p._id === id || p.id === id)
     if (!post) return
     const currentFaved = post.faved
+    // 更新本地缓存的 favIds
+    const favIds = wx.getStorageSync('favIds') || []
+    if (currentFaved) {
+      wx.setStorageSync('favIds', favIds.filter(i => i !== id))
+    } else {
+      wx.setStorageSync('favIds', favIds.concat([id]))
+    }
+    // 更新本地缓存的 favsMap（记录每个帖子的收藏数）
+    const favsMap = wx.getStorageSync('favsMap') || {}
+    const newFaved = !currentFaved
+    const newFavs = newFaved ? (post.favs || 0) + 1 : Math.max(0, (post.favs || 0) - 1)
+    favsMap[id] = newFavs
+    wx.setStorageSync('favsMap', favsMap)
     const updated = this.data.outfitList.map(p => {
-      if (p._id === id || p.id === id) return Object.assign({}, p, { faved: !p.faved })
+      if (p._id === id || p.id === id) {
+        return Object.assign({}, p, { faved: newFaved, favs: newFavs })
+      }
       return p
     })
     this.setData({ outfitList: updated })
     this.applyFilter(this.data.searchKeyword, this.data.activeFilter, updated)
-    wx.showToast({ title: currentFaved ? '已取消收藏' : '已收藏', icon: 'none' })
     dbUtil.toggleFav(id, currentFaved).catch(err => console.error('收藏同步失败', err))
   },
 

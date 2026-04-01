@@ -8,6 +8,8 @@ Page({
   },
 
   onLoad() {
+    // 用于丢弃过期的异步刷新结果
+    this._loadSeq = 0
     this.loadWardrobeData()
   },
 
@@ -16,34 +18,50 @@ Page({
   },
 
   // 加载衣橱数据
-  async loadWardrobeData() {
-    const wardrobeData = wx.getStorageSync('wardrobeData') || []
+  // 加载衣橱数据（防并发覆盖版本）
+async loadWardrobeData() {
+  // 生成本次请求序号
+  const seq = (this._loadSeq || 0) + 1
+  this._loadSeq = seq
 
-    for (let i = 0; i < wardrobeData.length; i++) {
-      const item = wardrobeData[i]
-      item.cartoonUrl = ''
-      item.originalUrl = ''
-      // 先清空旧链接，避免加载过期 URL 触发 403
-      item.cartoonUrl = ''
-      item.originalUrl = ''
-      try {
-        if (item.cartoonFileID) {
-          item.cartoonUrl = await this.getTempFileURL(item.cartoonFileID)
-        }
-        if (item.originalFileID) {
-          item.originalUrl = await this.getTempFileURL(item.originalFileID)
-        }
-      } catch (e) {
-        console.warn('衣橱页刷新临时链接失败', e)
+  // 读取快照用于拉临时链接
+  const snapshot = wx.getStorageSync('wardrobeData') || []
+  const tempUrlMap = {}
+
+  for (let i = 0; i < snapshot.length; i++) {
+    const item = snapshot[i]
+    const nextItem = { ...item, cartoonUrl: '', originalUrl: '' }
+
+    try {
+      if (item.cartoonFileID) {
+        nextItem.cartoonUrl = await this.getTempFileURL(item.cartoonFileID)
       }
+      if (item.originalFileID) {
+        nextItem.originalUrl = await this.getTempFileURL(item.originalFileID)
+      }
+    } catch (e) {
+      console.warn('衣橱页刷新临时链接失败', e)
     }
 
-    wx.setStorageSync('wardrobeData', wardrobeData)
+    tempUrlMap[nextItem.id] = nextItem
+  }
 
-    this.setData({
-      clothesList: wardrobeData
-    })
-  },
+  // 如果本次请求已经过期，直接丢弃结果（防抖关键）
+  if (seq !== this._loadSeq) return
+
+  // 最终永远以“最新 storage”为准，避免删除后被旧快照刷回来
+  const latest = wx.getStorageSync('wardrobeData') || []
+  const merged = latest.map(item => {
+    const cached = tempUrlMap[item.id]
+    return cached
+      ? { ...item, cartoonUrl: cached.cartoonUrl, originalUrl: cached.originalUrl }
+      : { ...item, cartoonUrl: '', originalUrl: '' }
+  })
+
+  this.setData({
+    clothesList: merged
+  })
+},
 
   // 选择图片
   chooseImage() {
@@ -89,6 +107,8 @@ Page({
         category: transferResult.category || 'unknown',
         categoryLabel: transferResult.categoryLabel || '未分类',
         categoryScore: Number(transferResult.categoryScore || 0),
+        waistOffset: Number(transferResult.waistOffset || 0),
+        waistOffsetX: Number(transferResult.waistOffsetX || 0),
         remark: '',
         uploadTime: Date.now()
       }
@@ -162,59 +182,79 @@ Page({
   },
 
   // 长按分类标签，手动修改分类
-  onCategoryLongPress(e) {
-    const id = e.currentTarget.dataset.id
-    wx.showActionSheet({
-      itemList: ['上衣', '裤子', '未分类'],
-      success: (res) => {
-        const categories = [
-          { category: 'top', categoryLabel: '上衣' },
-          { category: 'pants', categoryLabel: '裤子' },
-          { category: 'unknown', categoryLabel: '未分类' }
-        ]
-        const selected = categories[res.tapIndex]
-        const wardrobeData = this.data.clothesList.map(item => {
-          if (item.id === id) {
-            return { ...item, category: selected.category, categoryLabel: selected.categoryLabel }
+  // 长按分类标签，手动修改分类（latest storage 基准）
+onCategoryLongPress(e) {
+  const id = e.currentTarget.dataset.id
+  wx.showActionSheet({
+    itemList: ['上衣', '裤子', '未分类'],
+    success: (res) => {
+      const categories = [
+        { category: 'top', categoryLabel: '上衣' },
+        { category: 'pants', categoryLabel: '裤子' },
+        { category: 'unknown', categoryLabel: '未分类' }
+      ]
+      const selected = categories[res.tapIndex]
+
+      // 关键：基于最新 storage 修改
+      const latest = wx.getStorageSync('wardrobeData') || []
+      const wardrobeData = latest.map(item => {
+        if (item.id === id) {
+          return {
+            ...item,
+            category: selected.category,
+            categoryLabel: selected.categoryLabel
           }
-          return item
-        })
-        wx.setStorageSync('wardrobeData', wardrobeData)
-        this.setData({ clothesList: wardrobeData })
-        wx.showToast({ title: '分类已更新', icon: 'success' })
-      }
-    })
-  },
+        }
+        return item
+      })
+
+      wx.setStorageSync('wardrobeData', wardrobeData)
+
+      // 页面展示也按最新 storage 更新
+      this.setData({ clothesList: wardrobeData })
+      wx.showToast({ title: '分类已更新', icon: 'success' })
+    }
+  })
+},
 
   // 备注输入
-  onRemarkInput(e) {
-    const id = e.currentTarget.dataset.id
-    const remark = e.detail.value
+  // 备注输入（latest storage 基准）
+onRemarkInput(e) {
+  const id = e.currentTarget.dataset.id
+  const remark = e.detail.value
 
-    const wardrobeData = this.data.clothesList.map(item => {
-      if (item.id === id) return { ...item, remark }
-      return item
-    })
+  // 关键：基于最新 storage 修改
+  const latest = wx.getStorageSync('wardrobeData') || []
+  const wardrobeData = latest.map(item => {
+    if (item.id === id) return { ...item, remark }
+    return item
+  })
 
-    wx.setStorageSync('wardrobeData', wardrobeData)
-    this.setData({ clothesList: wardrobeData })
-  },
+  wx.setStorageSync('wardrobeData', wardrobeData)
+
+  // 页面展示也按最新 storage 更新
+  this.setData({ clothesList: wardrobeData })
+},
 
   // 删除服装
-  deleteClothes(e) {
-    const id = e.currentTarget.dataset.id
+  // 删除服装
+deleteClothes(e) {
+  const id = e.currentTarget.dataset.id
 
-    wx.showModal({
-      title: '确认删除',
-      content: '确定要删除这件服装吗？',
-      success: (res) => {
-        if (res.confirm) {
-          const wardrobeData = this.data.clothesList.filter(item => item.id !== id)
-          wx.setStorageSync('wardrobeData', wardrobeData)
-          this.setData({ clothesList: wardrobeData })
-          wx.showToast({ title: '删除成功', icon: 'success' })
-        }
+  wx.showModal({
+    title: '确认删除',
+    content: '确定要删除这件服装吗？',
+    success: (res) => {
+      if (res.confirm) {
+        // 一律基于最新 storage 删除，避免 this.data 是旧列表
+        const latest = wx.getStorageSync('wardrobeData') || []
+        const wardrobeData = latest.filter(item => item.id !== id)
+
+        wx.setStorageSync('wardrobeData', wardrobeData)
+        this.setData({ clothesList: wardrobeData })
+        wx.showToast({ title: '删除成功', icon: 'success' })
       }
-    })
-  }
+    }
+  })
+},
 })

@@ -4,7 +4,7 @@
 /**
  * 将图片转换为卡通风格并返回分类信息
  * @param {string} imagePath - 原图在云存储里的 fileID
- * @returns {Promise<{cartoonFileID:string, category:string, categoryLabel:string, categoryScore:number}>}
+ * @returns {Promise<{cartoonFileID:string, category:string, categoryLabel:string, categoryScore:number, waistOffset:number, waistOffsetX:number}>}
  */
 async function transferToCartoon(imagePath) {
   return await callCloudFunction(imagePath)
@@ -26,7 +26,9 @@ async function callCloudFunction(imagePath) {
             cartoonFileID: res.result.cartoonUrl,
             category: res.result.category || 'unknown',
             categoryLabel: res.result.categoryLabel || '未分类',
-            categoryScore: Number(res.result.categoryScore || 0)
+            categoryScore: Number(res.result.categoryScore || 0),
+            waistOffset: Number(res.result.waistOffset || 0),
+            waistOffsetX: Number(res.result.waistOffsetX || 0)
           })
         } else {
           reject(new Error((res.result && res.result.error) || '风格迁移失败'))

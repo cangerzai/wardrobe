@@ -65,40 +65,74 @@
     <text class="empty-desc">成为第一个在这里分享穿搭灵感的人吧。</text>
   </view>
 
-  <view class="outfit-list" wx:else>
-    <view class="outfit-card" wx:for="{{filteredList}}" wx:key="id">
-      <image class="outfit-image" src="{{item.image}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.id}}"></image>
-      <view class="outfit-body">
-        <view class="outfit-topline">
-          <text class="outfit-kicker">STYLE POST</text>
-          <text class="outfit-time">{{item.timeLabel}}</text>
-        </view>
-        <text class="outfit-title" bindtap="goDetail" data-id="{{item.id}}">{{item.desc || '无说明'}}</text>
-        <view class="tags-display" wx:if="{{item.tags.length > 0}}">
-          <text class="tag-item" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag"># {{tag}}</text>
-        </view>
-        <view class="author-row">
-          <image class="avatar" src="/images/default-avatar.png" mode="aspectFill"></image>
-          <view class="author-copy">
-            <text class="username">{{item.username || '衣橱用户'}}</text>
-            <text class="author-note">穿搭灵感发布者</text>
+  <view class="outfit-grid" wx:else>
+    <view class="outfit-col outfit-col-left">
+      <block wx:for="{{filteredList}}" wx:key="id">
+        <view class="outfit-card" wx:if="{{index % 2 === 0}}">
+          <image class="outfit-image" src="{{item.image}}" mode="widthFix" bindtap="goDetail" data-id="{{item.id}}"></image>
+          <view class="outfit-body">
+            <text class="outfit-title" bindtap="goDetail" data-id="{{item.id}}">{{item.desc || '无说明'}}</text>
+            <view class="tags-display" wx:if="{{item.tags.length > 0}}">
+              <text class="tag-item" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag"># {{tag}}</text>
+            </view>
+            <view class="card-footer">
+              <view class="card-author-row">
+                <image class="card-avatar" src="/images/default-avatar.png" mode="aspectFill"></image>
+                <text class="username">{{item.username || '衣橱用户'}}</text>
+              </view>
+              <text class="outfit-time">{{item.timeLabel}}</text>
+            </view>
+            <view class="action-bar">
+              <view class="action-btn-wrap" catchtap="toggleLike" data-id="{{item.id}}">
+                <text class="action-icon {{item.liked ? 'icon-liked' : ''}}">♥</text>
+                <text class="action-count">{{item.likes}}</text>
+              </view>
+              <view class="action-btn-wrap" catchtap="toggleFav" data-id="{{item.id}}">
+                <text class="action-icon {{item.faved ? 'icon-faved' : ''}}">★</text>
+                <text class="action-count">{{item.favs || 0}}</text>
+              </view>
+              <view class="action-btn-wrap" bindtap="goDetail" data-id="{{item.id}}">
+                <text class="action-icon">💬</text>
+                <text class="action-count">{{item.comments}}</text>
+              </view>
+            </view>
           </view>
         </view>
-        <view class="action-bar">
-          <view class="action-btn-wrap" catchtap="toggleLike" data-id="{{item.id}}">
-            <text class="action-icon {{item.liked ? 'icon-liked' : ''}}">♥</text>
-            <text class="action-count">{{item.likes}}</text>
-          </view>
-          <view class="action-btn-wrap" catchtap="toggleFav" data-id="{{item.id}}">
-            <text class="action-icon {{item.faved ? 'icon-faved' : ''}}">★</text>
-            <text class="action-count">{{item.faved ? '已收藏' : '收藏'}}</text>
-          </view>
-          <view class="action-btn-wrap" bindtap="goDetail" data-id="{{item.id}}">
-            <text class="action-icon">💬</text>
-            <text class="action-count">{{item.comments}} 评论</text>
+      </block>
+    </view>
+    <view class="outfit-col outfit-col-right">
+      <block wx:for="{{filteredList}}" wx:key="id">
+        <view class="outfit-card" wx:if="{{index % 2 === 1}}">
+          <image class="outfit-image" src="{{item.image}}" mode="widthFix" bindtap="goDetail" data-id="{{item.id}}"></image>
+          <view class="outfit-body">
+            <text class="outfit-title" bindtap="goDetail" data-id="{{item.id}}">{{item.desc || '无说明'}}</text>
+            <view class="tags-display" wx:if="{{item.tags.length > 0}}">
+              <text class="tag-item" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag"># {{tag}}</text>
+            </view>
+            <view class="card-footer">
+              <view class="card-author-row">
+                <image class="card-avatar" src="/images/default-avatar.png" mode="aspectFill"></image>
+                <text class="username">{{item.username || '衣橱用户'}}</text>
+              </view>
+              <text class="outfit-time">{{item.timeLabel}}</text>
+            </view>
+            <view class="action-bar">
+              <view class="action-btn-wrap" catchtap="toggleLike" data-id="{{item.id}}">
+                <text class="action-icon {{item.liked ? 'icon-liked' : ''}}">♥</text>
+                <text class="action-count">{{item.likes}}</text>
+              </view>
+              <view class="action-btn-wrap" catchtap="toggleFav" data-id="{{item.id}}">
+                <text class="action-icon {{item.faved ? 'icon-faved' : ''}}">★</text>
+                <text class="action-count">{{item.favs || 0}}</text>
+              </view>
+              <view class="action-btn-wrap" bindtap="goDetail" data-id="{{item.id}}">
+                <text class="action-icon">💬</text>
+                <text class="action-count">{{item.comments}}</text>
+              </view>
+            </view>
           </view>
         </view>
-      </view>
+      </block>
     </view>
   </view>
 

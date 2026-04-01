@@ -2,7 +2,7 @@
 <view class="page">
 
   <view class="post-card" wx:if="{{post}}">
-    <image class="post-image" src="{{post.image}}" mode="aspectFill"></image>
+    <image class="post-image" src="{{post.image}}" mode="widthFix"></image>
     <view class="post-body">
       <view class="author-row">
         <image class="avatar" src="/images/default-avatar.png" mode="aspectFill"></image>

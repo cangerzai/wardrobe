@@ -277,28 +277,64 @@
   gap: 26rpx;
 }
 
+/* 双列瀑布流 */
+.outfit-grid {
+  display: flex;
+  gap: 16rpx;
+  align-items: flex-start;
+}
+
+.outfit-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
 .outfit-card {
   background: rgba(255, 251, 247, 0.92);
-  border-radius: 32rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 16rpx 36rpx rgba(95, 67, 37, 0.1);
+  box-shadow: 0 10rpx 24rpx rgba(95, 67, 37, 0.1);
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  margin-top: 12rpx;
+}
+
+.card-author-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.card-avatar {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(143, 101, 72, 0.12);
 }
 
 .outfit-image {
   width: 100%;
-  height: 430rpx;
+  height: auto;
   background: #f1e5d7;
+  display: block;
 }
 
 .outfit-body {
-  padding: 28rpx;
+  padding: 16rpx;
 }
 
 .outfit-topline {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14rpx;
+  margin-bottom: 10rpx;
 }
 
 .outfit-kicker {

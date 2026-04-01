@@ -97,7 +97,9 @@ exports.main = async (event) => {
       cartoonUrl: uploadRes.fileID,
       category: (apiResp.data && apiResp.data.category) || 'unknown',
       categoryLabel: (apiResp.data && apiResp.data.categoryLabel) || '未分类',
-      categoryScore: Number((apiResp.data && apiResp.data.categoryScore) || 0)
+      categoryScore: Number((apiResp.data && apiResp.data.categoryScore) || 0),
+      waistOffset: Number((apiResp.data && apiResp.data.waistOffset) || 0),
+      waistOffsetX: Number((apiResp.data && apiResp.data.waistOffsetX) || 0)
     }
   } catch (e) {
     return {

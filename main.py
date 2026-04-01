@@ -24,6 +24,8 @@ class CartoonizeResp(BaseModel):
     category: str
     categoryLabel: str
     categoryScore: float
+    waistOffset: float = 0.0
+    waistOffsetX: float = 0.0
 
 
 class PoseReq(BaseModel):
@@ -118,6 +120,49 @@ def remove_background(pil_img: Image.Image) -> Image.Image:
     r_ch, g_ch, b_ch = img_rgb[:, :, 0], img_rgb[:, :, 1], img_rgb[:, :, 2]
     rgba = np.dstack([r_ch, g_ch, b_ch, alpha])
     return Image.fromarray(rgba, "RGBA")
+
+def detect_waist_offset(rgba_img: Image.Image) -> float:
+    """
+    检测前景顶部在整张图中的归一化位置（0~1）。
+    返回值越大，表示前景顶部离图片顶端越远（上方空白越多）。
+    """
+    arr = np.array(rgba_img)  # RGBA
+    alpha = arr[:, :, 3]
+
+    # 只看中间区域，减少边角噪声干扰
+    h, w = alpha.shape
+    x1 = int(w * 0.15)
+    x2 = int(w * 0.85)
+    alpha_mid = alpha[:, x1:x2]
+
+    rows = np.where(np.any(alpha_mid > 30, axis=1))[0]
+    if len(rows) == 0:
+        return 0.0
+
+    top_row = int(rows[0])
+    return round(top_row / h, 4)
+
+def detect_waist_offset_x(rgba_img: Image.Image, top_row_ratio: float) -> float:
+    """
+    检测前景上边缘（裤腰附近）的水平中心相对图片中心的偏移。
+    返回范围约 [-0.5, 0.5]，右偏为正，左偏为负。
+    """
+    arr = np.array(rgba_img)
+    alpha = arr[:, :, 3]
+    h, w = alpha.shape
+
+    top_row = int(max(0, min(h - 1, round(top_row_ratio * h))))
+    band_h = max(6, int(h * 0.08))
+    y1 = top_row
+    y2 = min(h, top_row + band_h)
+
+    band = alpha[y1:y2, :]
+    ys, xs = np.where(band > 30)
+    if len(xs) == 0:
+        return 0.0
+
+    cx = float(np.mean(xs)) / w
+    return round(cx - 0.5, 4)
 
 def to_multiple(x: int, is_tiny: bool = False) -> int:
     if is_tiny:
@@ -276,7 +321,15 @@ def cartoonize(req: CartoonizeReq):
         # 3. 对卡通化结果去背景（输出透明 PNG）
         cartoon_rgba = remove_background(cartoon_rgb)
 
-        # 4. 编码为 PNG base64（保留透明通道）
+        # 4. 动态检测裤腰偏移（仅裤子有意义）
+        if category == "pants":
+            waist_offset = detect_waist_offset(cartoon_rgba)
+            waist_offset_x = detect_waist_offset_x(cartoon_rgba, waist_offset)
+        else:
+            waist_offset = 0.0
+            waist_offset_x = 0.0
+
+        # 5. 编码为 PNG base64（保留透明通道）
         out_buf = BytesIO()
         cartoon_rgba.save(out_buf, format="PNG")
         out_b64 = base64.b64encode(out_buf.getvalue()).decode("utf-8")
@@ -285,7 +338,9 @@ def cartoonize(req: CartoonizeReq):
             imageBase64=out_b64,
             category=category,
             categoryLabel=category_label,
-            categoryScore=score
+            categoryScore=score,
+            waistOffset=waist_offset,
+            waistOffsetX=waist_offset_x
         )
     except Exception as e:
         raise RuntimeError(f"cartoonize failed: {str(e)}")

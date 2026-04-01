@@ -96,21 +96,25 @@ Page({
     const rk = pose.rightKnee
 
     // ── 上衣区域 ──
+    // 上移并放大：更贴合新模特
     const topY       = Math.max(0, ls[1] - 0.05)
-    const topBottom  = (lh[1] + rh[1]) / 2 + 0.03
+    const topBottom  = (lh[1] + rh[1]) / 2 + 0.06
     const topH       = topBottom - topY
-    // 上衣宽度固定为容器宽度的 70%，居中对齐
-    const topW       = 0.70
+    // 上衣宽度增大
+    const topW       = 0.78
     const topCenterX = (ls[0] + rs[0]) / 2
     const topLeft    = Math.max(0, topCenterX - topW / 2)
 
     // ── 裤子区域 ──
     // 对齐模特白色短裤的腰部最上方
-    const pantsY      = 0.38
-    const pantsBottom = Math.min(1.0, 0.97)
+    const basePantsY = 0.37
+    const selectedPantsOffset = Number((this.data.selectedPants && this.data.selectedPants.waistOffset) || 0)
+    // 补偿系数可调：0.85（建议 0.7 ~ 1.0）
+    const pantsY = Math.max(0, basePantsY - selectedPantsOffset * 0.85)
+    const pantsBottom = Math.min(1.0, 0.98)
     const pantsH      = pantsBottom - pantsY
     const pantsW      = 0.80
-    const pantsCenterX = (lh[0] + rh[0]) / 2 + 0.01
+    const pantsCenterX = (lh[0] + rh[0]) / 2 
     const pantsLeft   = Math.max(0, pantsCenterX - pantsW / 2)
 
     // 转成百分比 style 字符串
@@ -173,7 +177,10 @@ Page({
 
     wx.setStorageSync('wardrobeData', wardrobeData)
     this.setData({ allClothesList: wardrobeData })
+
+    // 重新过滤，并强制刷新当前选中的服装（如果是新添加的）
     this.applyFilter(this.data.activeCategory, wardrobeData)
+
     // 若 pose 已加载，重新计算样式
     if (this.data.pose) {
       this._recalcStyles(this.data.pose)
@@ -200,7 +207,9 @@ Page({
       update.selectedPants = first
     }
 
-    this.setData(update)
+    this.setData(update, () => {
+      if (this.data.pose) this._recalcStyles(this.data.pose)
+    })
   },
 
   toggleDropdown() {
